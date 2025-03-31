@@ -39,7 +39,7 @@ This application offers a powerful suite of tools for media manipulation, file m
 2. Run the installer and follow the on-screen instructions.  
 3. Optionally, install extra modules like Tesseract OCR.  
 4. Launch the app and start using it!
-5. If you can't find your desired language in Tesseract, please download it from the [Tesseract GitHub page](https://github.com/tesseract-ocr/tesseract) and place it under the `_internal` folder of the app.
+5. If you can't find your desired language in Tesseract, please download it from the [Tesseract GitHub page](https://github.com/tesseract-ocr/tesseract) and place it under the app folder.
 
 ---
 
