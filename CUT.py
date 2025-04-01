@@ -38,6 +38,15 @@ from themes import ThemeManager
 from PIL import Image
 from datetime import datetime
 import sys
+import ctypes
+import subprocess
+
+#for FFMEG (YT and Universal tools)
+
+try:
+    import ffmpeg
+except ImportError:
+    ffmpeg = None
 
 # For OCR (Extra Tools)
 try:
@@ -45,12 +54,10 @@ try:
 except ImportError:
     pytesseract = None
 
-
 if getattr(sys, 'frozen', False):
-    
-    base_path = sys._MEIPASS 
+ 
+    base_path = os.path.dirname(sys.executable)
 else:
-    # If running in a normal Python environment
     base_path = os.path.dirname(os.path.abspath(__file__))
 
 # For encryption/decryption (Extra Tools)
@@ -61,6 +68,7 @@ except ImportError:
 
 pytesseract.pytesseract.tesseract_cmd = os.path.join(base_path, 'tesseract', 'tesseract.exe')
 ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe')
+print(f"FFmpeg Path: {ffmpeg_path}")
 
 #############################################
 # Global Configuration Dictionary
@@ -243,12 +251,17 @@ class Tooltip:
 #############################################
 # Audio Conversion (Simpler Version)
 #############################################
-def convert_audio_to_wav(input_path, output_path):
-    """Simply convert input audio file to WAV (for speed)."""
-    audio = AudioSegment.from_file(input_path)
-    audio.export(output_path, format="wav")
-    return output_path
-
+def convert_audio_to_wav(mp3_path, wav_path):
+    try:
+        # Use the explicitly defined ffmpeg_path variable in the command
+        command = [ffmpeg_path, '-y', '-i', mp3_path, wav_path]
+        result = subprocess.run(command, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise Exception(f"FFmpeg conversion error: {result.stderr}")
+        print("Audio converted to WAV successfully.")
+    except Exception as e:
+        print("Error during audio conversion:", str(e))
+        raise
 
 #############################################
 # Base Class for Download & Transcribe (shared by YT & Universal)
@@ -571,6 +584,7 @@ class YouTubeFrame(BaseDownloadFrame):
                 'progress_hooks': [self.update_progress_bar],
                 'noplaylist': True,
                 'merge_output_format': fmt if fmt in ["mp4", "webm"] else None,
+                'ffmpeg_location': os.path.join(base_path, 'ffmpeg', 'bin')  # <-- Added FFmpeg location here
             }
             if mode == "Audio Only":
                 pp = {"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}
@@ -1854,6 +1868,7 @@ class UniversalFrame(BaseDownloadFrame):
                 'progress_hooks': [self.update_progress_bar],
                 'noplaylist': True,
                 'merge_output_format': fmt if fmt in ["mp4", "webm"] else None,
+                'ffmpeg_location': os.path.join(base_path, 'ffmpeg', 'bin')  # <-- Added FFmpeg location here
             }
             if mode == "Audio Only":
                 pp = {"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}
@@ -1883,7 +1898,7 @@ class UniversalFrame(BaseDownloadFrame):
         finally:
             self.after(0, lambda: self.download_btn.config(state="normal"))
             self.after(0, lambda: self.transcribe_btn.config(state="normal"))
-
+            
     def transcribe_only(self):
         if not self.url_var.get().strip():
             messagebox.showerror("Error", "Please enter a URL")
@@ -2295,14 +2310,25 @@ Thank you for using Complete Utility App!
 
 
 if __name__ == "__main__":
-    import ctypes
-    myappid = '0pen-Sourcer.utility.app.1.0'  
+    myappid = '0pen-Sourcer.utility.app.1.0'
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     root = Tk()
+
     ThemeManager.load_custom_themes()
     app = CompleteApp(root)
-    root.iconbitmap("icon.ico")
+
+    def resource_path(relative_path):
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(base_path, relative_path)
+    
+    icon_path = resource_path("icon.ico")
+    if os.path.exists(icon_path):
+        root.iconbitmap(icon_path)  
+    else:
+        print("Icon not found at:", icon_path)
+    
     ThemeManager.apply_theme(root, config.get("theme", "Classic"))
     root.mainloop()
-
-
