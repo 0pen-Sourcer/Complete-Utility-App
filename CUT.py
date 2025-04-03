@@ -534,7 +534,7 @@ class YouTubeFrame(BaseDownloadFrame):
         if "youtube.com" not in url and "youtu.be" not in url:
             return False
         # Must have either "?v=" (watch link) or "/shorts/"
-        if "?v=" in url or "/shorts/" in url:
+        if "?v=" in url or "/shorts/" in url or "youtu.be/" in url:
             return True
         return False
 
