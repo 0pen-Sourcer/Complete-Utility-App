@@ -1,7 +1,7 @@
 #  Complete Utility App (CUT)
 ### 📌 Your All-in-One Solution for Productivity, Media Management, and Security
 
-<img src="assets/icon.png" alt="Complete Utility App Icon" width="200"/>
+<img src="Assets/icon.png" alt="Complete Utility App Icon" width="200"/>
 
 ![License](https://img.shields.io/github/license/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
 ![Stars](https://img.shields.io/github/stars/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
