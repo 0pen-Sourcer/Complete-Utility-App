@@ -1,71 +1,97 @@
-# Complete Utility App (CUT)
+#  Complete Utility App (CUT)
+### 📌 Your All-in-One Solution for Productivity, Media Management, and Security
 
-Complete Utility App is a powerful, all-in-one desktop tool crafted to streamline your digital tasks. Equipped with a comprehensive suite of features, it empowers you to effortlessly manage media, files, productivity tools, and security. Whether you're downloading content, converting files, enhancing productivity, or safeguarding your data, CUT has you covered—efficiently and effectively.
+<img src="assets/icon.png" alt="Complete Utility App Icon" width="200"/>
 
-[icon](https://github.com/user-attachments/assets/59094e5b-17d3-48d4-aa59-bc69b88040ea)
+![License](https://img.shields.io/github/license/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
+![Stars](https://img.shields.io/github/stars/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
+![Forks](https://img.shields.io/github/forks/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
+![Issues](https://img.shields.io/github/issues/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
+![Downloads](https://img.shields.io/github/downloads/0pen-sourcer/Complete-Utility-App/total?style=for-the-badge)
+
 ---
 
-## 📋 Features
-- **YouTube Tools:**  
-  - Download videos in various resolutions and formats.  
-  - Metadata management.  
-  - Audio extraction.  
+## 📖 Overview
+**Complete Utility App (CUT)** is a feature-packed desktop tool designed to simplify your digital life. With a seamless interface and robust functionalities, CUT combines media management, productivity tools, and security features into a single application.  
 
-- **Media Tools:**  
-  - Image file Coversion   
-  - Image-to-PDF conversion, image resizing, PDF merging/splitting, batch file renaming.  
+> **CUT** is your **ultimate Swiss Army knife** for handling tasks ranging from YouTube downloads to OCR text extraction and file encryption.  
 
-- **Extra Tools:**  
-  - OCR (Tesseract-based, supports multiple languages).  
-  - File encryption and decryption.  
-  - QR code generation.  
-  - Light, dark custom themes.  
+---
 
-- **Security:**  
-  - Master password for protecting sensitive data and encrypted keys.  
+## 🌟 Features
+### 🔗 **YouTube Tools**
+- 📥 Download videos in various resolutions and formats.
+- 🎵 Extract audio directly from videos.
+- 📄 Transcribe videos using built-in tools.
+
+### 🖼️ **Media Tools**
+- 📸 Convert image formats, resize images, and create PDFs from images.
+- 📄 Merge, split, and manage PDF files.
+- 🔄 Batch rename files with ease.
+
+### 🧰 **Extra Tools**
+- 🔍 OCR (Powered by Tesseract) for text extraction from images.
+- 🔒 File encryption and decryption for securing sensitive files.
+- 📲 QR code generation.
+- 🎨 Customizable themes for personalized experience.
+
+### 🔑 **Security**
+- 🔐 Master password protection for safeguarding sensitive data.
+- 📂 Encrypted storage for files and keys.
 
 ---
 
 ## 💻 System Requirements
 - **Operating System:** Windows 7 or later  
-- **Disk Space:** Minimum 700 MB of free space  
+- **Disk Space:** Minimum 700 MB  
 - **RAM:** At least 512 MB  
-- **Internet Connection:** Required for certain features  
+- **Internet Connection:** Required for YouTube downloads and updates  
 
 ---
 
 ## 📦 Installation
-1. Download the installer from the [Releases](https://github.com/0pen-sourcer/Complete-Utility-App/releases) page.  
-2. Run the installer and follow the on-screen instructions.  
-3. Optionally, install extra modules like Tesseract OCR.  
-4. Launch the app and start using it!
-5. If you can't find your desired language in Tesseract, please download it from the [Tesseract GitHub page](https://github.com/tesseract-ocr/tesseract) and place it under the app folder.
+1. **Download** the installer from the [Releases](https://github.com/0pen-sourcer/Complete-Utility-App/releases) page.  
+2. **Run** the installer and follow the setup instructions.  
+3. **Launch CUT** and start using its powerful features!  
+
+> 📌 **Tesseract Language Update:** To add new languages, download them from [Tesseract GitHub](https://github.com/tesseract-ocr/tesseract) and place them in the app folder.
 
 ---
 
-## 📚 Usage
-- Access all tools via the user-friendly interface.  
-- Enable/disable modules from the settings menu.  
-- Detailed instructions are available within the app.  
+## 🚀 Usage
+- **Access tools** through the user-friendly interface.  
+- **Enable/disable modules** via the Settings menu.  
+- Detailed **instructions and troubleshooting tips** are available within the app.  
 
 ---
 
-## 📜 License
-This software is licensed under the **GNU GPL v3**. See the LICENSE file for more details.  
-Tesseract OCR is bundled under the **Apache License 2.0**.  
+## 🛠️ Contributing
+Want to make **CUT** even better? Follow these steps:
+
+1. **Fork** the repository.  
+2. **Create a branch** for your feature (`git checkout -b feature/YourFeature`).  
+3. **Commit** your changes (`git commit -m "Add YourFeature"`).  
+4. **Push** to the branch (`git push origin feature/YourFeature`).  
+5. **Submit a pull request** for review.  
 
 ---
 
 ## 📧 Contact
 - **Instagram:** [@fissile_u235](https://www.instagram.com/fissile_u235)  
-- **Email:** [ishantstech@gmail.com](mailto:ishantstech@gmail.com)
-- Report issues on **GitHub** or via email with logs/screenshots.  
+- **Email:** [ishantstech@gmail.com](mailto:ishantstech@gmail.com)  
+- **Report Issues:** [GitHub Issues](https://github.com/0pen-sourcer/Complete-Utility-App/issues)  
 
 ---
 
+## 📜 License
+This project is licensed under the **GNU GPL v3**.  
+Tesseract OCR is licensed under the **Apache License 2.0**.  
+
+---
 
 ## 📚 Documentation
+Complete documentation is provided within the app. Access it via the **Help menu**.
 
-###Full documentation is provided within the app. Access it via the Help menu.
+---
 
-Thank you for using Complete Utility App! 😊
+Thank you for using Complete Utility App 😊
