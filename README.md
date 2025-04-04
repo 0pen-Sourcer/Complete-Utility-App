@@ -70,7 +70,6 @@
 
 ## 🚀 Usage
 - **Access tools** through the user-friendly interface.  
-- **Enable/disable modules** via the Settings menu.  
 - Detailed **instructions and troubleshooting tips** are available within the app.  
 
 ---
