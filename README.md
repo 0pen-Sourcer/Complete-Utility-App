@@ -1,13 +1,23 @@
 #  Complete Utility App (CUT)
 ### 📌 Your All-in-One Solution for Productivity, Media Management, and Security
 
-<img src="Assets/icon.png" alt="Complete Utility App Icon" width="200"/>
+<div align="center">
+  <img src="assets/icon.png" alt="Complete Utility App Icon" width="200" style="margin-bottom: 20px;"/>
+</div>
 
-![License](https://img.shields.io/github/license/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
-![Stars](https://img.shields.io/github/stars/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
-![Forks](https://img.shields.io/github/forks/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
-![Issues](https://img.shields.io/github/issues/0pen-sourcer/Complete-Utility-App?style=for-the-badge)
-![Downloads](https://img.shields.io/github/downloads/0pen-sourcer/Complete-Utility-App/total?style=for-the-badge)
+<br>
+
+<div align="center">
+  <a href="https://github.com/0pen-Sourcer/Complete-Utility-App/releases">
+    <img src="https://img.shields.io/github/v/release/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt="GitHub release (latest by date)">
+  </a>
+  <a href="https://github.com/0pen-Sourcer/Complete-Utility-App/stargazers">
+    <img src="https://img.shields.io/github/stars/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/0pen-Sourcer/Complete-Utility-App/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt="GitHub license">
+  </a>
+</div>
 
 ---
 
