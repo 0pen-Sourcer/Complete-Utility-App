@@ -2,7 +2,7 @@
 ### 📌 Your All-in-One Solution for Productivity, Media Management, and Security
 
 <div align="center">
-  <img src="assets/icon.png" alt="Complete Utility App Icon" width="200" style="margin-bottom: 20px;"/>
+  <img src="Assets/icon.png" alt="Complete Utility App Icon" width="200" style="margin-bottom: 20px;"/>
 </div>
 
 <br>
