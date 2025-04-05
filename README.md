@@ -9,13 +9,13 @@
 
 <div align="center">
   <a href="https://github.com/0pen-Sourcer/Complete-Utility-App/releases">
-    <img src="https://img.shields.io/github/v/release/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt="GitHub release (latest by date)">
+    <img src="https://img.shields.io/github/v/release/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt=" latest release">
   </a>
   <a href="https://github.com/0pen-Sourcer/Complete-Utility-App/stargazers">
-    <img src="https://img.shields.io/github/stars/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt="GitHub stars">
+    <img src="https://img.shields.io/github/stars/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt="stars">
   </a>
   <a href="https://github.com/0pen-Sourcer/Complete-Utility-App/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt="GitHub license">
+    <img src="https://img.shields.io/github/license/0pen-Sourcer/Complete-Utility-App?style=for-the-badge" alt="license">
   </a>
 </div>
 
@@ -74,14 +74,10 @@
 
 ---
 
-## 🛠️ Contributing
-Want to make **CUT** even better? Follow these steps:
+## 📌 Community & Contributions
 
-1. **Fork** the repository.  
-2. **Create a branch** for your feature (`git checkout -b feature/YourFeature`).  
-3. **Commit** your changes (`git commit -m "Add YourFeature"`).  
-4. **Push** to the branch (`git push origin feature/YourFeature`).  
-5. **Submit a pull request** for review.  
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Contribution Guidelines](./CONTRIBUTING.md)
 
 ---
 
@@ -90,6 +86,16 @@ Want to make **CUT** even better? Follow these steps:
 - **Email:** [ishantstech@gmail.com](mailto:ishantstech@gmail.com)  
 - **Report Issues:** [GitHub Issues](https://github.com/0pen-sourcer/Complete-Utility-App/issues)  
 
+---
+
+## 🙏 Attribution & Respect
+
+Complete Utility App (CUT) was proudly built by **Ishant Singh** ([@0pen-Sourcer](https://github.com/0pen-Sourcer)).  
+If you're using or modifying this software, please retain all original credits.  
+
+**This is an open-source community tool — not for unauthorized resale or rebranding.**
+
+For any issues or requests, feel free to [email me](mailto:ishantstech@gmail.com).
 ---
 
 ## 📜 License
