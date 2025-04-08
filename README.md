@@ -29,25 +29,71 @@
 ---
 
 ## 🌟 Features
-### 🔗 **YouTube Tools**
+CUT brings together tools you’d normally need 10 apps for — in a clean, unified experience.
+
+### 🔗 YouTube Tools
 - 📥 Download videos in various resolutions and formats.
 - 🎵 Extract audio directly from videos.
 - 📄 Transcribe videos using built-in tools.
 
-### 🖼️ **Media Tools**
+### 🖼️ Media Tools
 - 📸 Convert image formats, resize images, and create PDFs from images.
 - 📄 Merge, split, and manage PDF files.
 - 🔄 Batch rename files with ease.
 
-### 🧰 **Extra Tools**
+### 🧰 Extra Tools
 - 🔍 OCR (Powered by Tesseract) for text extraction from images.
 - 🔒 File encryption and decryption for securing sensitive files.
 - 📲 QR code generation.
 - 🎨 Customizable themes for personalized experience.
 
-### 🔑 **Security**
+### 🔑 Security
 - 🔐 Master password protection for safeguarding sensitive data.
 - 📂 Encrypted storage for files and keys.
+
+> 👇 **Want to see CUT in action? Check out the GIF previews of key features below.**
+
+---
+
+## 📽️ Feature Previews
+
+<details>
+  <summary>Click to expand and preview CUT in action</summary>
+
+**🎨 Appearance Settings**  
+<img src="assets/gifs/Appearence-settings-overview.gif" alt="Appearance Settings" width="600"/>
+
+**🎨 Custom Theme**  
+<img src="assets/gifs/custom-theme.gif" alt="Custom Theme" width="600"/>
+
+**🧠 Download + Transcribe**  
+<img src="assets/gifs/download-and-transcribe.gif" alt="Download and Transcribe" width="600"/>
+
+**⚙️ General Settings**  
+<img src="assets/gifs/General-settings.gif" alt="General Settings" width="600"/>
+
+**🖼️ Image Converter**  
+<img src="assets/gifs/image-converter.gif" alt="Image Converter" width="600"/>
+
+**🔠 OCR (Image to Text)**  
+<img src="assets/gifs/OCR.gif" alt="OCR" width="600"/>
+
+**📄 PDF Merge**  
+<img src="assets/gifs/PDF-merge.gif" alt="PDF Merge" width="600"/>
+
+**🧾 Rename PDFs**  
+<img src="assets/gifs/PDF-rename.gif" alt="PDF Rename" width="600"/>
+
+**📲 QR Code Generator**  
+<img src="assets/gifs/QR-code.gif" alt="QR Code Generator" width="600"/>
+
+**🧾 Themes Panel**  
+<img src="assets/gifs/themes.gif" alt="Themes" width="600"/>
+
+**🎥 YouTube Tools**  
+<img src="assets/gifs/yt-tools.gif" alt="YouTube Tools" width="600"/>
+
+</details>
 
 ---
 
