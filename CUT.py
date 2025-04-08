@@ -68,7 +68,6 @@ except ImportError:
 
 pytesseract.pytesseract.tesseract_cmd = os.path.join(base_path, 'tesseract', 'tesseract.exe')
 ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe')
-print(f"FFmpeg Path: {ffmpeg_path}")
 
 #############################################
 # Global Configuration Dictionary
@@ -2324,7 +2323,7 @@ if __name__ == "__main__":
             base_path = os.path.dirname(os.path.abspath(__file__))
         return os.path.join(base_path, relative_path)
     
-    icon_path = resource_path("icon.ico")
+    icon_path = resource_path("assets/icon.ico")
     if os.path.exists(icon_path):
         root.iconbitmap(icon_path)  
     else:
