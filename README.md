@@ -60,6 +60,8 @@ CUT brings together tools you’d normally need 10 apps for — in a clean, unif
 <details>
   <summary>Click to expand and preview CUT in action</summary>
 
+**⚙️ General Settings**  
+<img src="Assets/gifs/General-settings.gif" alt="General Settings" width="600"/>
 
 **🎨 Appearance Settings**  
 <img src="Assets/gifs/Appearence-settings-overview.gif" alt="Appearance Settings" width="600"/>
@@ -67,7 +69,7 @@ CUT brings together tools you’d normally need 10 apps for — in a clean, unif
 **🎨 Custom Theme**  
 <img src="Assets/gifs/custom-theme.gif" alt="Custom Theme" width="600"/>
 
-**🧾 Themes Panel**  
+**🖌️ Themes Panel**  
 <img src="Assets/gifs/themes.gif" alt="Themes" width="600"/>
 
 **🎥 YouTube Tools**  
@@ -76,8 +78,8 @@ CUT brings together tools you’d normally need 10 apps for — in a clean, unif
 **🧠 Download + Transcribe**  
 <img src="Assets/gifs/download-and-transcribe.gif" alt="Download and Transcribe" width="600"/>
 
-**⚙️ General Settings**  
-<img src="Assets/gifs/General-settings.gif" alt="General Settings" width="600"/>
+**🔐 Encryption and Decryption**  
+<img src="Assets/gifs/Encrypt.gif" alt="Encryption and Decryption" width="600"/>
 
 **🖼️ Image Converter**  
 <img src="Assets/gifs/image-converter.gif" alt="Image Converter" width="600"/>
@@ -88,13 +90,13 @@ CUT brings together tools you’d normally need 10 apps for — in a clean, unif
 **📄 PDF Merge**  
 <img src="Assets/gifs/PDF-merge.gif" alt="PDF Merge" width="600"/>
 
-**🧾 Rename PDFs**  
+**📝 Rename PDFs**  
 <img src="Assets/gifs/PDF-rename.gif" alt="PDF Rename" width="600"/>
 
 **📲 QR Code Generator**  
 <img src="Assets/gifs/QR-code.gif" alt="QR Code Generator" width="600"/>
 
-**And many more features!
+**🛠️ And many more features!**
 
 </details>
 
