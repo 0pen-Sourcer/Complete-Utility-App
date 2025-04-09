@@ -60,38 +60,41 @@ CUT brings together tools you’d normally need 10 apps for — in a clean, unif
 <details>
   <summary>Click to expand and preview CUT in action</summary>
 
+
 **🎨 Appearance Settings**  
-<img src="assets/gifs/Appearence-settings-overview.gif" alt="Appearance Settings" width="600"/>
+<img src="Assets/gifs/Appearence-settings-overview.gif" alt="Appearance Settings" width="600"/>
 
 **🎨 Custom Theme**  
-<img src="assets/gifs/custom-theme.gif" alt="Custom Theme" width="600"/>
-
-**🧠 Download + Transcribe**  
-<img src="assets/gifs/download-and-transcribe.gif" alt="Download and Transcribe" width="600"/>
-
-**⚙️ General Settings**  
-<img src="assets/gifs/General-settings.gif" alt="General Settings" width="600"/>
-
-**🖼️ Image Converter**  
-<img src="assets/gifs/image-converter.gif" alt="Image Converter" width="600"/>
-
-**🔠 OCR (Image to Text)**  
-<img src="assets/gifs/OCR.gif" alt="OCR" width="600"/>
-
-**📄 PDF Merge**  
-<img src="assets/gifs/PDF-merge.gif" alt="PDF Merge" width="600"/>
-
-**🧾 Rename PDFs**  
-<img src="assets/gifs/PDF-rename.gif" alt="PDF Rename" width="600"/>
-
-**📲 QR Code Generator**  
-<img src="assets/gifs/QR-code.gif" alt="QR Code Generator" width="600"/>
+<img src="Assets/gifs/custom-theme.gif" alt="Custom Theme" width="600"/>
 
 **🧾 Themes Panel**  
-<img src="assets/gifs/themes.gif" alt="Themes" width="600"/>
+<img src="Assets/gifs/themes.gif" alt="Themes" width="600"/>
 
 **🎥 YouTube Tools**  
-<img src="assets/gifs/yt-tools.gif" alt="YouTube Tools" width="600"/>
+<img src="Assets/gifs/yt-tools.gif" alt="YouTube Tools" width="600"/>
+
+**🧠 Download + Transcribe**  
+<img src="Assets/gifs/download-and-transcribe.gif" alt="Download and Transcribe" width="600"/>
+
+**⚙️ General Settings**  
+<img src="Assets/gifs/General-settings.gif" alt="General Settings" width="600"/>
+
+**🖼️ Image Converter**  
+<img src="Assets/gifs/image-converter.gif" alt="Image Converter" width="600"/>
+
+**🔠 OCR (Image to Text)**  
+<img src="Assets/gifs/OCR.gif" alt="OCR" width="600"/>
+
+**📄 PDF Merge**  
+<img src="Assets/gifs/PDF-merge.gif" alt="PDF Merge" width="600"/>
+
+**🧾 Rename PDFs**  
+<img src="Assets/gifs/PDF-rename.gif" alt="PDF Rename" width="600"/>
+
+**📲 QR Code Generator**  
+<img src="Assets/gifs/QR-code.gif" alt="QR Code Generator" width="600"/>
+
+**And many more features!
 
 </details>
 
