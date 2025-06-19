@@ -147,11 +147,21 @@ If you're using or modifying this software, please retain all original credits.
 **This is an open-source community tool — not for unauthorized resale or rebranding.**
 
 For any issues or requests, feel free to [email me](mailto:ishantstech@gmail.com).
+
 ---
 
 ## 📜 License
 This project is licensed under the **GNU GPL v3**.  
 Tesseract OCR is licensed under the **Apache License 2.0**.  
+
+---
+
+## ⚠️ Legal Disclaimer
+
+**Complete Utility App is intended for personal and legal use only.**  
+This tool provides downloading, conversion, and encryption features for educational and responsible usage.  
+Users are solely responsible for complying with all applicable laws and platform terms.  
+The developer does not condone or support piracy, copyright infringement, or illegal file access in any form.
 
 ---
 
