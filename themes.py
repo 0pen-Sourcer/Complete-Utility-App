@@ -230,6 +230,7 @@ class ThemeManager:
                 except Exception:
                     pass
             elif widget_type == "Menubutton":
+                # Menubutton uses same styling as Button
                 try:
                     widget.configure(**cached_configs["Button"])
                 except Exception:

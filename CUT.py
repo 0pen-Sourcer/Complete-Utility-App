@@ -1432,11 +1432,11 @@ class ExtraToolsFrame(Frame):
         
         def encrypt_thread():
             try:
-                # Use streaming encryption for better memory efficiency
+                # Encrypt entire file (Fernet requires full data for encryption)
                 fernet = Fernet(key)
                 enc_file = os.path.join(get_encryption_folder(), os.path.basename(file) + ".enc")
                 
-                # Read entire file (Fernet requires full data, but we optimize by reading once)
+                # Read and encrypt file
                 with open(file, "rb") as f:
                     data = f.read()
                 
@@ -1474,11 +1474,11 @@ class ExtraToolsFrame(Frame):
         
         def decrypt_thread():
             try:
-                # Use streaming decryption for better memory efficiency
+                # Decrypt entire file (Fernet requires full data for decryption)
                 fernet = Fernet(key.encode())
                 dec_file = file.rsplit(".enc", 1)[0]
                 
-                # Read entire encrypted file (Fernet requires full data)
+                # Read and decrypt file
                 with open(file, "rb") as f:
                     data = f.read()
                 
