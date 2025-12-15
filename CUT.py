@@ -55,16 +55,9 @@ except ImportError:
     pytesseract = None
 
 if getattr(sys, 'frozen', False):
- 
     base_path = os.path.dirname(sys.executable)
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
-
-# For encryption/decryption (Extra Tools)
-try:
-    from cryptography.fernet import Fernet
-except ImportError:
-    Fernet = None
 
 pytesseract.pytesseract.tesseract_cmd = os.path.join(base_path, 'tesseract', 'tesseract.exe')
 ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe')
