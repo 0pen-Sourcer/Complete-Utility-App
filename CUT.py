@@ -2279,7 +2279,9 @@ class ExtraToolsFrame(Frame):
                     "Kilogram": 1, "Gram": 0.001, "Milligram": 0.000001,
                     "Pound": 0.453592, "Ounce": 0.0283495, "Ton": 1000
                 },
-                "Temperature": {},  # Special handling needed
+                "Temperature": {
+                    "Celsius": 1, "Fahrenheit": 1, "Kelvin": 1  # Special handling in conversion logic
+                },
                 "Volume": {
                     "Liter": 1, "Milliliter": 0.001, "Gallon (US)": 3.78541,
                     "Quart": 0.946353, "Pint": 0.473176, "Cup": 0.236588
