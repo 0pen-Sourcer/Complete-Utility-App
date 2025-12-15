@@ -158,13 +158,24 @@ def get_trimmed_audio_folder():
     os.makedirs(folder, exist_ok=True)
     return folder
 
+def get_trimmed_video_folder():
+    folder = os.path.join(get_base_folder(), "Trimmed Video")
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
 
 def get_qr_codes_folder():
     folder = os.path.join(get_base_folder(), "QR Codes")
     os.makedirs(folder, exist_ok=True)
     return folder
+
+def get_compressed_files_folder():
+    folder = os.path.join(get_base_folder(), "Compressed Files")
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
 def get_decrypted_key_folder():
-    folder = os.path.join(get_base_folder(), "Decryted Key")
+    folder = os.path.join(get_base_folder(), "Decrypted Key")
     os.makedirs(folder, exist_ok=True)
     return folder
 
@@ -748,16 +759,17 @@ class MediaToolsFrame(Frame):
         pdf_hint.pack(pady=5)
         Tooltip(pdf_hint, "Merge multiple PDFs into one file or split a PDF into multiple files.\nSpecify page ranges for splitting.")
 
-        # Audio Tools Section
-        Label(self, text="Audio Tools:", font=("Arial", 12)).pack(pady=(20,5))
+        # Audio/Video Tools Section
+        Label(self, text="Audio/Video Tools:", font=("Arial", 12)).pack(pady=(20,5))
         
-        audio_btn_frame = Frame(self)
-        audio_btn_frame.pack(pady=5)
-        Button(audio_btn_frame, text="Trim Audio", command=self.trim_audio).pack(side="left", padx=5)
+        av_btn_frame = Frame(self)
+        av_btn_frame.pack(pady=5)
+        Button(av_btn_frame, text="Trim Audio", command=self.trim_audio).pack(side="left", padx=5)
+        Button(av_btn_frame, text="Trim Video", command=self.trim_video).pack(side="left", padx=5)
         
-        audio_hint = Label(self, text="?", fg="blue", cursor="question_arrow")
-        audio_hint.pack(pady=5)
-        Tooltip(audio_hint, "Trim audio files by specifying start and end times.\nSupported formats: MP3, WAV, OGG, M4A")
+        av_hint = Label(self, text="?", fg="blue", cursor="question_arrow")
+        av_hint.pack(pady=5)
+        Tooltip(av_hint, "Trim audio or video files by specifying start and end times.\nSupported formats: MP3, WAV, OGG, M4A for audio | MP4, AVI, MKV for video")
 
         # QR Code Tools Section
         Label(self, text="QR Code Generator:", font=("Arial", 12)).pack(pady=(20,5))
@@ -769,6 +781,18 @@ class MediaToolsFrame(Frame):
         qr_hint = Label(self, text="?", fg="blue", cursor="question_arrow")
         qr_hint.pack(pady=5)
         Tooltip(qr_hint, "Generate QR codes from text or URLs.\nCustomize size and save as PNG.")
+
+        # File Compression Tools Section
+        Label(self, text="File Compression:", font=("Arial", 12)).pack(pady=(20,5))
+        
+        compress_btn_frame = Frame(self)
+        compress_btn_frame.pack(pady=5)
+        Button(compress_btn_frame, text="Create ZIP Archive", command=self.create_zip).pack(side="left", padx=5)
+        Button(compress_btn_frame, text="Extract ZIP Archive", command=self.extract_zip).pack(side="left", padx=5)
+        
+        compress_hint = Label(self, text="?", fg="blue", cursor="question_arrow")
+        compress_hint.pack(pady=5)
+        Tooltip(compress_hint, "Compress files and folders into ZIP archives or extract existing ZIP files.")
 
         # Rename Schemes
         self.image_scheme_var = StringVar(value="Numeric")
@@ -1115,6 +1139,78 @@ class MediaToolsFrame(Frame):
         except Exception as e:
             messagebox.showerror("Error", f"Error: {e}")
 
+    def trim_video(self):
+        """Trim video files using ffmpeg"""
+        try:
+            file_path = filedialog.askopenfilename(
+                title="Select Video File",
+                filetypes=[("Video files", "*.mp4 *.avi *.mkv *.mov *.wmv")]
+            )
+            if not file_path:
+                return
+            
+            # Create themed trim dialog
+            trim_dialog = Toplevel(self)
+            trim_dialog.title("Trim Video")
+            trim_dialog.geometry("300x250")
+            ThemeManager.apply_theme(trim_dialog, config.get("theme", "Classic"))
+            
+            Label(trim_dialog, text="Enter trim points (MM:SS):").pack(pady=5)
+            
+            time_frame = Frame(trim_dialog)
+            time_frame.pack(pady=5)
+            
+            Label(time_frame, text="Start:").pack(side="left")
+            start_var = StringVar()
+            Entry(time_frame, textvariable=start_var, width=8).pack(side="left", padx=5)
+            
+            Label(time_frame, text="End:").pack(side="left")
+            end_var = StringVar()
+            Entry(time_frame, textvariable=end_var, width=8).pack(side="left", padx=5)
+
+            def process_trim():
+                try:
+                    start_time_str = start_var.get()
+                    end_time_str = end_var.get()
+
+                    # Validate time format
+                    if not start_time_str or not end_time_str:
+                        messagebox.showerror("Error", "Please enter both start and end times")
+                        return
+
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    file_ext = os.path.splitext(file_path)[1]
+                    output_path = os.path.join(get_trimmed_video_folder(), 
+                                             f"trimmed_{timestamp}_{os.path.basename(file_path)}")
+                    
+                    # Use ffmpeg to trim the video
+                    # Format: ffmpeg -i input.mp4 -ss 00:01:00 -to 00:02:00 -c copy output.mp4
+                    command = [
+                        ffmpeg_path,
+                        '-i', file_path,
+                        '-ss', start_time_str,
+                        '-to', end_time_str,
+                        '-c', 'copy',
+                        output_path
+                    ]
+                    
+                    result = subprocess.run(command, capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        self.status_label.config(text=f"Video trimmed and saved!\nLocation: {output_path}")
+                        trim_dialog.destroy()
+                    else:
+                        messagebox.showerror("Error", f"FFmpeg error: {result.stderr}")
+                    
+                except Exception as e:
+                    messagebox.showerror("Error", f"Error trimming video: {e}")
+            
+            Button(trim_dialog, text="Trim", command=process_trim).pack(pady=10)
+            Button(trim_dialog, text="Cancel", command=trim_dialog.destroy).pack(pady=5)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error: {e}")
+
     def generate_qr(self):
         try:
             import qrcode
@@ -1210,6 +1306,89 @@ class MediaToolsFrame(Frame):
         except Exception as e:
             messagebox.showerror("Error", f"Error: {e}")
 
+    def create_zip(self):
+        """Create a ZIP archive from selected files and/or folders"""
+        try:
+            import zipfile
+            
+            # Ask user to select files
+            files = filedialog.askopenfilenames(
+                title="Select Files to Compress",
+                filetypes=[("All files", "*.*")]
+            )
+            
+            # Ask if user wants to add folders
+            add_folders = messagebox.askyesno("Add Folders?", "Do you want to add folders to the archive?")
+            folders = []
+            
+            if add_folders:
+                while True:
+                    folder = filedialog.askdirectory(title="Select Folder to Add (Cancel to finish)")
+                    if not folder:
+                        break
+                    folders.append(folder)
+            
+            if not files and not folders:
+                return
+            
+            # Ask for output location and name
+            output_file = filedialog.asksaveasfilename(
+                defaultextension=".zip",
+                filetypes=[("ZIP files", "*.zip")],
+                title="Save ZIP Archive As"
+            )
+            
+            if not output_file:
+                return
+            
+            # Create the ZIP file
+            with zipfile.ZipFile(output_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                # Add files
+                for file in files:
+                    zipf.write(file, os.path.basename(file))
+                
+                # Add folders
+                for folder in folders:
+                    for root, dirs, folder_files in os.walk(folder):
+                        for file in folder_files:
+                            file_path = os.path.join(root, file)
+                            arcname = os.path.relpath(file_path, os.path.dirname(folder))
+                            zipf.write(file_path, arcname)
+            
+            self.status_label.config(text=f"ZIP archive created successfully!\nLocation: {output_file}")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error creating ZIP archive: {e}")
+
+    def extract_zip(self):
+        """Extract a ZIP archive"""
+        try:
+            import zipfile
+            
+            # Select ZIP file
+            zip_file = filedialog.askopenfilename(
+                title="Select ZIP Archive",
+                filetypes=[("ZIP files", "*.zip")]
+            )
+            
+            if not zip_file:
+                return
+            
+            # Select output directory
+            output_dir = filedialog.askdirectory(title="Select Output Directory")
+            
+            if not output_dir:
+                return
+            
+            # Extract the ZIP file
+            with zipfile.ZipFile(zip_file, 'r') as zipf:
+                zipf.extractall(output_dir)
+            
+            self.status_label.config(text=f"ZIP archive extracted successfully!\nLocation: {output_dir}")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error extracting ZIP archive: {e}")
+
 
 #############################################
 # Tab 4: Extra Tools (OCR & Encryption)
@@ -1276,6 +1455,31 @@ class ExtraToolsFrame(Frame):
             "Make sure to set a master password to hide the encryption keys or don't (it is up to you).\n"
             "You can copy the encryption key to use it later.\n"
             "Avoid overwriting the master password multiple times, or you may encounter nested encryption issues.\n"
+        )
+
+        # --------------------------------------------------
+        # Text-to-Speech Frame
+        # --------------------------------------------------
+        tts_frame = Frame(self)
+        tts_frame.pack(pady=10, fill="x")
+
+        Label(tts_frame, text="Text-to-Speech:", font=("Arial", 12)).pack(pady=5)
+        
+        Label(tts_frame, text="Enter text to convert to speech:").pack(pady=5)
+        self.tts_text = Text(tts_frame, height=5, width=60, wrap="word")
+        self.tts_text.pack(pady=5)
+        
+        btn_tts = Frame(tts_frame)
+        btn_tts.pack(pady=5)
+        Button(btn_tts, text="Convert to Speech", command=self.text_to_speech).pack(side="left", padx=5)
+        Button(btn_tts, text="Clear", command=lambda: self.tts_text.delete("1.0", "end")).pack(side="left", padx=5)
+        
+        q_label_tts = Label(tts_frame, text="?", fg="blue", cursor="question_arrow")
+        q_label_tts.pack(pady=5)
+        Tooltip(
+            q_label_tts,
+            "Convert text to speech and save as MP3 audio file.\n"
+            "Uses Google Text-to-Speech (gTTS) library."
         )
 
     def select_image(self):
@@ -1403,6 +1607,37 @@ class ExtraToolsFrame(Frame):
                 messagebox.showwarning("Warning", "No key available to copy.")
         else:
             messagebox.showwarning("Warning", "No key available to copy.")
+
+    def text_to_speech(self):
+        """Convert text to speech and save as MP3"""
+        try:
+            from gtts import gTTS
+            
+            text = self.tts_text.get("1.0", "end").strip()
+            if not text:
+                messagebox.showwarning("Warning", "Please enter some text to convert.")
+                return
+            
+            # Ask for output location and name
+            output_file = filedialog.asksaveasfilename(
+                defaultextension=".mp3",
+                filetypes=[("MP3 files", "*.mp3")],
+                title="Save Audio As"
+            )
+            
+            if not output_file:
+                return
+            
+            # Convert text to speech
+            tts = gTTS(text=text, lang='en', slow=False)
+            tts.save(output_file)
+            
+            messagebox.showinfo("Success", f"Speech audio saved successfully!\nLocation: {output_file}")
+            
+        except ImportError:
+            messagebox.showerror("Error", "Please install gTTS package: pip install gtts")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error converting text to speech: {e}")
 
 
 
