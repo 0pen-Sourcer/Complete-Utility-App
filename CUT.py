@@ -832,18 +832,29 @@ class MediaToolsFrame(Frame):
                     pil_format = "JPEG"
                 else:
                     pil_format = selected_format.upper()
-
-                output_folder = get_converted_pdfs_folder()  # Adjust to your desired folder
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_file_name = f"converted_{timestamp}.{selected_format}"
-                output_path = os.path.join(output_folder, output_file_name)
-
-                # Open the image and convert it
-                with Image.open(file_path) as img:
-                    img.save(output_path, format=pil_format)  # Save in the selected format
-
-                self.status_label.config(text=f"Image converted to {pil_format}!\nSaved as: {output_path}")
+                
+                # Show processing state
                 format_dialog.destroy()
+                self.status_label.config(text="Converting image...")
+                self.update()
+                
+                def convert_thread():
+                    try:
+                        output_folder = get_converted_pdfs_folder()  # Adjust to your desired folder
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        output_file_name = f"converted_{timestamp}.{selected_format}"
+                        output_path = os.path.join(output_folder, output_file_name)
+
+                        # Open the image and convert it
+                        with Image.open(file_path) as img:
+                            img.save(output_path, format=pil_format)  # Save in the selected format
+
+                        self.after(0, lambda: self.status_label.config(text=f"Image converted to {pil_format}!\nSaved as: {output_path}"))
+                    except Exception as e:
+                        self.after(0, lambda: messagebox.showerror("Error", f"Error: {e}"))
+                        self.after(0, lambda: self.status_label.config(text=""))
+                
+                threading.Thread(target=convert_thread, daemon=True).start()
 
             Button(format_dialog, text="Convert", command=process_conversion).pack(pady=10)
             Button(format_dialog, text="Cancel", command=format_dialog.destroy).pack(pady=5)
@@ -1142,16 +1153,27 @@ class MediaToolsFrame(Frame):
                     start_time = (start_minutes * 60 + start_seconds) * 1000  # Convert to milliseconds
                     end_time = (end_minutes * 60 + end_seconds) * 1000  # Convert to milliseconds
                     
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    output_path = os.path.join(get_trimmed_audio_folder(), 
-                                             f"trimmed_{timestamp}_{os.path.basename(file_path)}")
-                    
-                    audio = AudioSegment.from_file(file_path)
-                    trimmed_audio = audio[start_time:end_time]
-                    trimmed_audio.export(output_path, format=os.path.splitext(output_path)[1][1:])
-                    
-                    self.status_label.config(text=f"Audio trimmed and saved!\nLocation: {output_path}")
+                    # Show processing state
                     trim_dialog.destroy()
+                    self.status_label.config(text="Trimming audio...")
+                    self.update()
+                    
+                    def trim_thread():
+                        try:
+                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            output_path = os.path.join(get_trimmed_audio_folder(), 
+                                                     f"trimmed_{timestamp}_{os.path.basename(file_path)}")
+                            
+                            audio = AudioSegment.from_file(file_path)
+                            trimmed_audio = audio[start_time:end_time]
+                            trimmed_audio.export(output_path, format=os.path.splitext(output_path)[1][1:])
+                            
+                            self.after(0, lambda: self.status_label.config(text=f"Audio trimmed and saved!\nLocation: {output_path}"))
+                        except Exception as e:
+                            self.after(0, lambda: messagebox.showerror("Error", f"Error trimming audio: {e}"))
+                            self.after(0, lambda: self.status_label.config(text=""))
+                    
+                    threading.Thread(target=trim_thread, daemon=True).start()
                     
                 except ValueError:
                     messagebox.showerror("Error", "Please enter valid time in MM:SS format")
