@@ -1060,10 +1060,15 @@ class MediaToolsFrame(Frame):
                         return
                     
                     position = position_var.get()
-                    opacity = int(opacity_var.get())
                     
-                    if opacity < 0 or opacity > 255:
-                        messagebox.showerror("Error", "Opacity must be between 0 and 255")
+                    # Validate opacity input
+                    try:
+                        opacity = int(opacity_var.get())
+                        if opacity < 0 or opacity > 255:
+                            messagebox.showerror("Error", "Opacity must be between 0 and 255")
+                            return
+                    except ValueError:
+                        messagebox.showerror("Error", "Opacity must be a valid number")
                         return
                     
                     output_folder = get_watermarked_images_folder()
@@ -1118,8 +1123,6 @@ class MediaToolsFrame(Frame):
                     self.status_label.config(text=f"Watermarks added!\nSaved in: {output_folder}")
                     watermark_dialog.destroy()
                     
-                except ValueError:
-                    messagebox.showerror("Error", "Invalid opacity value")
                 except Exception as e:
                     messagebox.showerror("Error", f"Error adding watermark: {e}")
             
@@ -1856,6 +1859,16 @@ class ExtraToolsFrame(Frame):
                         y1 = int(y1_var.get())
                         x2 = int(x2_var.get())
                         y2 = int(y2_var.get())
+                        
+                        # Validate that the region is valid
+                        if x2 <= x1 or y2 <= y1:
+                            messagebox.showerror("Error", 
+                                "Invalid region: X2 must be greater than X1, and Y2 must be greater than Y1")
+                            return
+                        
+                        if x1 < 0 or y1 < 0 or x2 < 0 or y2 < 0:
+                            messagebox.showerror("Error", "Coordinates must be non-negative")
+                            return
                         
                         screenshot = ImageGrab.grab(bbox=(x1, y1, x2, y2))
                         output_path = os.path.join(output_folder, f"screenshot_region_{timestamp}.png")
