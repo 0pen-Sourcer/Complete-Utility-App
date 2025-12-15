@@ -58,6 +58,9 @@ CUT brings together tools you'd normally need 10+ apps for — in a clean, unifi
 - 🔐 Hash calculator (MD5, SHA1, SHA256, SHA512) for files and text.
 - 🔑 Password generator with customizable length and character sets.
 - 🎨 Color picker with HEX, RGB, and HSV values.
+- 🔄 Unit converter (Length, Weight, Temperature, Volume, Data, Time).
+- 🔍 Duplicate file finder with hash-based comparison.
+- 💻 System information viewer with detailed specs.
 - 🎨 Customizable themes with ability to create your own.
 
 ### 🔑 Security

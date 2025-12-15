@@ -1701,6 +1701,60 @@ class ExtraToolsFrame(Frame):
             "Copy color codes to clipboard for use in design."
         )
 
+        # --------------------------------------------------
+        # Unit Converter Frame
+        # --------------------------------------------------
+        unit_frame = Frame(self)
+        unit_frame.pack(pady=10, fill="x")
+
+        Label(unit_frame, text="Unit Converter:", font=("Arial", 12)).pack(pady=5)
+        
+        Button(unit_frame, text="Convert Units", command=self.unit_converter).pack(pady=5)
+        
+        q_label_unit = Label(unit_frame, text="?", fg="blue", cursor="question_arrow")
+        q_label_unit.pack(pady=5)
+        Tooltip(
+            q_label_unit,
+            "Convert between different units:\n"
+            "Length, Weight, Temperature, Volume, Area, Time, Speed, Data"
+        )
+
+        # --------------------------------------------------
+        # Duplicate Finder Frame
+        # --------------------------------------------------
+        dup_frame = Frame(self)
+        dup_frame.pack(pady=10, fill="x")
+
+        Label(dup_frame, text="Duplicate File Finder:", font=("Arial", 12)).pack(pady=5)
+        
+        Button(dup_frame, text="Find Duplicates", command=self.find_duplicates).pack(pady=5)
+        
+        q_label_dup = Label(dup_frame, text="?", fg="blue", cursor="question_arrow")
+        q_label_dup.pack(pady=5)
+        Tooltip(
+            q_label_dup,
+            "Find duplicate files in a folder using hash comparison.\n"
+            "Helps free up disk space by identifying identical files."
+        )
+
+        # --------------------------------------------------
+        # System Info Frame
+        # --------------------------------------------------
+        sysinfo_frame = Frame(self)
+        sysinfo_frame.pack(pady=10, fill="x")
+
+        Label(sysinfo_frame, text="System Information:", font=("Arial", 12)).pack(pady=5)
+        
+        Button(sysinfo_frame, text="View System Info", command=self.view_system_info).pack(pady=5)
+        
+        q_label_sys = Label(sysinfo_frame, text="?", fg="blue", cursor="question_arrow")
+        q_label_sys.pack(pady=5)
+        Tooltip(
+            q_label_sys,
+            "View detailed system information:\n"
+            "OS, CPU, Memory, Disk, Network, Python version"
+        )
+
     def select_image(self):
         file = filedialog.askopenfilename(
             title="Select an Image",
@@ -2203,6 +2257,324 @@ class ExtraToolsFrame(Frame):
                 
         except Exception as e:
             messagebox.showerror("Error", f"Error picking color: {e}")
+
+    def unit_converter(self):
+        """Unit converter tool"""
+        try:
+            # Create unit converter dialog
+            conv_dialog = Toplevel(self)
+            conv_dialog.title("Unit Converter")
+            conv_dialog.geometry("500x400")
+            ThemeManager.apply_theme(conv_dialog, config.get("theme", "Classic"))
+            
+            Label(conv_dialog, text="Unit Converter", font=("Arial", 14, "bold")).pack(pady=10)
+            
+            # Unit categories
+            categories = {
+                "Length": {
+                    "Meter": 1, "Kilometer": 1000, "Centimeter": 0.01, "Millimeter": 0.001,
+                    "Mile": 1609.34, "Yard": 0.9144, "Foot": 0.3048, "Inch": 0.0254
+                },
+                "Weight": {
+                    "Kilogram": 1, "Gram": 0.001, "Milligram": 0.000001,
+                    "Pound": 0.453592, "Ounce": 0.0283495, "Ton": 1000
+                },
+                "Temperature": {},  # Special handling needed
+                "Volume": {
+                    "Liter": 1, "Milliliter": 0.001, "Gallon (US)": 3.78541,
+                    "Quart": 0.946353, "Pint": 0.473176, "Cup": 0.236588
+                },
+                "Data": {
+                    "Byte": 1, "Kilobyte": 1024, "Megabyte": 1024**2, "Gigabyte": 1024**3,
+                    "Terabyte": 1024**4, "Bit": 0.125
+                },
+                "Time": {
+                    "Second": 1, "Minute": 60, "Hour": 3600, "Day": 86400,
+                    "Week": 604800, "Month": 2592000, "Year": 31536000
+                }
+            }
+            
+            # Category selection
+            category_frame = Frame(conv_dialog)
+            category_frame.pack(pady=10)
+            
+            Label(category_frame, text="Category:").grid(row=0, column=0, padx=5)
+            category_var = StringVar(value="Length")
+            category_combo = ttk.Combobox(category_frame, textvariable=category_var, 
+                                        values=list(categories.keys()), state="readonly", width=15)
+            category_combo.grid(row=0, column=1, padx=5)
+            
+            # Input section
+            input_frame = Frame(conv_dialog)
+            input_frame.pack(pady=10)
+            
+            Label(input_frame, text="From:").grid(row=0, column=0, padx=5)
+            from_var = StringVar()
+            from_combo = ttk.Combobox(input_frame, textvariable=from_var, state="readonly", width=15)
+            from_combo.grid(row=0, column=1, padx=5)
+            
+            value_var = StringVar()
+            Entry(input_frame, textvariable=value_var, width=15).grid(row=0, column=2, padx=5)
+            
+            Label(input_frame, text="To:").grid(row=1, column=0, padx=5)
+            to_var = StringVar()
+            to_combo = ttk.Combobox(input_frame, textvariable=to_var, state="readonly", width=15)
+            to_combo.grid(row=1, column=1, padx=5)
+            
+            result_var = StringVar()
+            result_entry = Entry(input_frame, textvariable=result_var, state="readonly", width=15)
+            result_entry.grid(row=1, column=2, padx=5)
+            
+            def update_units(*args):
+                category = category_var.get()
+                if category in categories:
+                    units = list(categories[category].keys())
+                    from_combo['values'] = units
+                    to_combo['values'] = units
+                    if units:
+                        from_var.set(units[0])
+                        to_var.set(units[1] if len(units) > 1 else units[0])
+            
+            category_var.trace('w', update_units)
+            update_units()
+            
+            def convert():
+                try:
+                    category = category_var.get()
+                    from_unit = from_var.get()
+                    to_unit = to_var.get()
+                    value = float(value_var.get())
+                    
+                    if category == "Temperature":
+                        # Special temperature conversion
+                        if from_unit == "Celsius" and to_unit == "Fahrenheit":
+                            result = (value * 9/5) + 32
+                        elif from_unit == "Fahrenheit" and to_unit == "Celsius":
+                            result = (value - 32) * 5/9
+                        elif from_unit == "Celsius" and to_unit == "Kelvin":
+                            result = value + 273.15
+                        elif from_unit == "Kelvin" and to_unit == "Celsius":
+                            result = value - 273.15
+                        elif from_unit == "Fahrenheit" and to_unit == "Kelvin":
+                            result = (value - 32) * 5/9 + 273.15
+                        elif from_unit == "Kelvin" and to_unit == "Fahrenheit":
+                            result = (value - 273.15) * 9/5 + 32
+                        else:
+                            result = value
+                    else:
+                        # Standard conversion using base units
+                        base_value = value * categories[category][from_unit]
+                        result = base_value / categories[category][to_unit]
+                    
+                    result_var.set(f"{result:.6f}".rstrip('0').rstrip('.'))
+                    
+                except ValueError:
+                    messagebox.showerror("Error", "Please enter a valid number")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Conversion error: {e}")
+            
+            Button(conv_dialog, text="Convert", command=convert).pack(pady=10)
+            Button(conv_dialog, text="Copy Result", 
+                  command=lambda: self.copy_to_clipboard(result_var.get()) if result_var.get() else None).pack(pady=5)
+            Button(conv_dialog, text="Close", command=conv_dialog.destroy).pack(pady=5)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error in unit converter: {e}")
+
+    def find_duplicates(self):
+        """Find duplicate files in a folder"""
+        try:
+            folder = filedialog.askdirectory(title="Select Folder to Scan for Duplicates")
+            if not folder:
+                return
+            
+            # Create progress dialog
+            progress_dialog = Toplevel(self)
+            progress_dialog.title("Finding Duplicates")
+            progress_dialog.geometry("400x150")
+            ThemeManager.apply_theme(progress_dialog, config.get("theme", "Classic"))
+            
+            Label(progress_dialog, text="Scanning for duplicate files...").pack(pady=10)
+            progress_label = Label(progress_dialog, text="Starting...")
+            progress_label.pack(pady=5)
+            
+            progress_bar = ttk.Progressbar(progress_dialog, mode='indeterminate')
+            progress_bar.pack(pady=10, padx=20, fill="x")
+            progress_bar.start()
+            
+            def scan_duplicates():
+                try:
+                    # Dictionary to store file hashes
+                    hash_dict = {}
+                    duplicates = []
+                    
+                    # Get all files
+                    all_files = []
+                    for root, dirs, files in os.walk(folder):
+                        for file in files:
+                            all_files.append(os.path.join(root, file))
+                    
+                    total_files = len(all_files)
+                    
+                    for idx, file_path in enumerate(all_files):
+                        try:
+                            # Update progress
+                            self.after(0, lambda i=idx: progress_label.config(
+                                text=f"Scanning file {i+1} of {total_files}..."))
+                            
+                            # Calculate file hash
+                            file_hash = hashlib.md5()
+                            with open(file_path, 'rb') as f:
+                                while chunk := f.read(8192):
+                                    file_hash.update(chunk)
+                            
+                            hash_value = file_hash.hexdigest()
+                            
+                            if hash_value in hash_dict:
+                                duplicates.append((hash_dict[hash_value], file_path))
+                            else:
+                                hash_dict[hash_value] = file_path
+                                
+                        except Exception as e:
+                            continue
+                    
+                    # Close progress dialog
+                    self.after(0, progress_dialog.destroy)
+                    
+                    # Show results
+                    if duplicates:
+                        self.show_duplicate_results(duplicates)
+                    else:
+                        messagebox.showinfo("No Duplicates", "No duplicate files found!")
+                        
+                except Exception as e:
+                    self.after(0, progress_dialog.destroy)
+                    self.after(0, lambda: messagebox.showerror("Error", f"Error scanning: {e}"))
+            
+            threading.Thread(target=scan_duplicates, daemon=True).start()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error finding duplicates: {e}")
+
+    def show_duplicate_results(self, duplicates):
+        """Show duplicate files in a dialog"""
+        result_dialog = Toplevel(self)
+        result_dialog.title(f"Duplicate Files Found ({len(duplicates)} duplicates)")
+        result_dialog.geometry("700x500")
+        ThemeManager.apply_theme(result_dialog, config.get("theme", "Classic"))
+        
+        Label(result_dialog, text=f"Found {len(duplicates)} duplicate file(s)", 
+              font=("Arial", 12, "bold")).pack(pady=10)
+        
+        # Create scrolled text widget
+        text_frame = Frame(result_dialog)
+        text_frame.pack(pady=10, padx=10, fill="both", expand=True)
+        
+        text_widget = Text(text_frame, wrap="word", height=20, width=80)
+        text_widget.pack(side="left", fill="both", expand=True)
+        
+        scrollbar = Scrollbar(text_frame, command=text_widget.yview)
+        scrollbar.pack(side="right", fill="y")
+        text_widget.config(yscrollcommand=scrollbar.set)
+        
+        # Add duplicate info
+        for idx, (original, duplicate) in enumerate(duplicates, 1):
+            text_widget.insert("end", f"\n{idx}. Duplicate Set:\n", "bold")
+            text_widget.insert("end", f"   Original:  {original}\n")
+            text_widget.insert("end", f"   Duplicate: {duplicate}\n")
+            text_widget.insert("end", "-" * 80 + "\n")
+        
+        text_widget.tag_config("bold", font=("Arial", 10, "bold"))
+        text_widget.config(state="disabled")
+        
+        Button(result_dialog, text="Close", command=result_dialog.destroy).pack(pady=10)
+
+    def view_system_info(self):
+        """View system information"""
+        try:
+            import platform
+            
+            # Create system info dialog
+            info_dialog = Toplevel(self)
+            info_dialog.title("System Information")
+            info_dialog.geometry("600x500")
+            ThemeManager.apply_theme(info_dialog, config.get("theme", "Classic"))
+            
+            Label(info_dialog, text="System Information", font=("Arial", 14, "bold")).pack(pady=10)
+            
+            # Create scrolled text widget
+            text_frame = Frame(info_dialog)
+            text_frame.pack(pady=10, padx=10, fill="both", expand=True)
+            
+            text_widget = Text(text_frame, wrap="word", height=20, width=70, font=("Courier", 9))
+            text_widget.pack(side="left", fill="both", expand=True)
+            
+            scrollbar = Scrollbar(text_frame, command=text_widget.yview)
+            scrollbar.pack(side="right", fill="y")
+            text_widget.config(yscrollcommand=scrollbar.set)
+            
+            # Gather system information
+            info = []
+            info.append("=" * 60)
+            info.append("OPERATING SYSTEM")
+            info.append("=" * 60)
+            info.append(f"System: {platform.system()}")
+            info.append(f"Release: {platform.release()}")
+            info.append(f"Version: {platform.version()}")
+            info.append(f"Machine: {platform.machine()}")
+            info.append(f"Processor: {platform.processor()}")
+            info.append(f"Platform: {platform.platform()}")
+            
+            info.append("\n" + "=" * 60)
+            info.append("PYTHON INFORMATION")
+            info.append("=" * 60)
+            info.append(f"Python Version: {platform.python_version()}")
+            info.append(f"Python Implementation: {platform.python_implementation()}")
+            info.append(f"Python Compiler: {platform.python_compiler()}")
+            
+            # Try to get additional system info
+            try:
+                import psutil
+                info.append("\n" + "=" * 60)
+                info.append("SYSTEM RESOURCES")
+                info.append("=" * 60)
+                
+                # Memory info
+                mem = psutil.virtual_memory()
+                info.append(f"Total Memory: {mem.total / (1024**3):.2f} GB")
+                info.append(f"Available Memory: {mem.available / (1024**3):.2f} GB")
+                info.append(f"Used Memory: {mem.used / (1024**3):.2f} GB ({mem.percent}%)")
+                
+                # CPU info
+                info.append(f"\nCPU Count (Logical): {psutil.cpu_count(logical=True)}")
+                info.append(f"CPU Count (Physical): {psutil.cpu_count(logical=False)}")
+                info.append(f"CPU Usage: {psutil.cpu_percent(interval=1)}%")
+                
+                # Disk info
+                disk = psutil.disk_usage('/')
+                info.append(f"\nDisk Total: {disk.total / (1024**3):.2f} GB")
+                info.append(f"Disk Used: {disk.used / (1024**3):.2f} GB ({disk.percent}%)")
+                info.append(f"Disk Free: {disk.free / (1024**3):.2f} GB")
+                
+            except ImportError:
+                info.append("\n(Install psutil for detailed resource information)")
+            
+            # Display information
+            text_widget.insert("1.0", "\n".join(info))
+            text_widget.config(state="disabled")
+            
+            def copy_info():
+                self.clipboard_clear()
+                self.clipboard_append("\n".join(info))
+                messagebox.showinfo("Copied", "System information copied to clipboard!")
+            
+            btn_frame = Frame(info_dialog)
+            btn_frame.pack(pady=10)
+            Button(btn_frame, text="Copy to Clipboard", command=copy_info).pack(side="left", padx=5)
+            Button(btn_frame, text="Close", command=info_dialog.destroy).pack(side="left", padx=5)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error getting system info: {e}")
 
 
 
