@@ -179,53 +179,59 @@ class ThemeManager:
 
         # Configure the root widget background for tk widgets
         if root.winfo_class() in ("Frame", "Toplevel", "Tk"):
-            root.configure(bg=theme["bg"])
+            try:
+                root.configure(bg=theme["bg"])
+            except Exception:
+                pass
+
+        # Cache theme data to avoid repeated lookups
+        cached_configs = {
+            "Frame": {"bg": theme["bg"]},
+            "Label": {"bg": theme["bg"], "fg": theme["fg"], "font": theme["font"]},
+            "Button": {
+                "bg": theme["button_bg"],
+                "fg": theme["button_fg"],
+                "font": theme["font"],
+                "activebackground": theme["accent"],
+                "activeforeground": "#ffffff"
+            },
+            "Entry": {
+                "bg": theme["entry_bg"],
+                "fg": theme["entry_fg"],
+                "font": theme["font"],
+                "insertbackground": theme["fg"]
+            },
+            "Text": {
+                "bg": theme["entry_bg"],
+                "fg": theme["entry_fg"],
+                "font": theme["font"],
+                "insertbackground": theme["fg"]
+            },
+            "Menu": {
+                "bg": theme["bg"],
+                "fg": theme["fg"],
+                "activebackground": theme["accent"],
+                "activeforeground": "#ffffff"
+            }
+        }
 
         def configure_widget(widget):
             widget_type = widget.winfo_class()
-            if widget_type in ("Frame", "Toplevel", "Tk"):
+            
+            # Use cached configuration if available
+            if widget_type in cached_configs:
+                try:
+                    widget.configure(**cached_configs[widget_type])
+                except Exception:
+                    pass
+            elif widget_type in ("Toplevel", "Tk"):
                 try:
                     widget.configure(bg=theme["bg"])
                 except Exception:
                     pass
-            elif widget_type == "Label":
+            elif widget_type == "Menubutton":
                 try:
-                    widget.configure(bg=theme["bg"],
-                                     fg=theme["fg"],
-                                     font=theme["font"])
-                except Exception:
-                    pass
-            elif widget_type in ("Button", "Menubutton"):
-                try:
-                    widget.configure(bg=theme["button_bg"],
-                                     fg=theme["button_fg"],
-                                     font=theme["font"],
-                                     activebackground=theme["accent"],
-                                     activeforeground="#ffffff")
-                except Exception:
-                    pass
-            elif widget_type == "Entry":
-                try:
-                    widget.configure(bg=theme["entry_bg"],
-                                     fg=theme["entry_fg"],
-                                     font=theme["font"],
-                                     insertbackground=theme["fg"])
-                except Exception:
-                    pass
-            elif widget_type == "Text":
-                try:
-                    widget.configure(bg=theme["entry_bg"],
-                                     fg=theme["entry_fg"],
-                                     font=theme["font"],
-                                     insertbackground=theme["fg"])
-                except Exception:
-                    pass
-            elif widget_type == "Menu":
-                try:
-                    widget.configure(bg=theme["bg"],
-                                     fg=theme["fg"],
-                                     activebackground=theme["accent"],
-                                     activeforeground="#ffffff")
+                    widget.configure(**cached_configs["Button"])
                 except Exception:
                     pass
 
