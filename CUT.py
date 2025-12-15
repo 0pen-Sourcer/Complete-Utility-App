@@ -833,10 +833,10 @@ class MediaToolsFrame(Frame):
                 else:
                     pil_format = selected_format.upper()
                 
-                # Show processing state
-                format_dialog.destroy()
+                # Show processing state and close dialog
                 self.status_label.config(text="Converting image...")
                 self.update()
+                format_dialog.destroy()
                 
                 def convert_thread():
                     try:
@@ -1433,7 +1433,8 @@ class ExtraToolsFrame(Frame):
         def encrypt_thread():
             try:
                 # Read and encrypt entire file for simplicity
-                # Note: For very large files, consider using chunked encryption with a different cipher
+                # Note: For files larger than ~100MB, consider using chunked encryption
+                # with a different cipher (e.g., AES-GCM) to reduce memory usage
                 fernet = Fernet(key)
                 enc_file = os.path.join(get_encryption_folder(), os.path.basename(file) + ".enc")
                 
@@ -1476,7 +1477,8 @@ class ExtraToolsFrame(Frame):
         def decrypt_thread():
             try:
                 # Read and decrypt entire file for simplicity
-                # Note: For very large files, consider using chunked decryption with a different cipher
+                # Note: For files larger than ~100MB, consider using chunked decryption
+                # with a different cipher (e.g., AES-GCM) to reduce memory usage
                 fernet = Fernet(key.encode())
                 dec_file = file.rsplit(".enc", 1)[0]
                 
@@ -1493,6 +1495,11 @@ class ExtraToolsFrame(Frame):
                 
                 # Open file safely in the main thread
                 def open_file():
+                    # Validate that the file exists before attempting to open
+                    if not os.path.exists(dec_file):
+                        messagebox.showerror("Error", "Decrypted file not found")
+                        return
+                    
                     if os.name == 'nt':
                         os.startfile(dec_file)
                     else:

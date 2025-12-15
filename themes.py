@@ -230,10 +230,9 @@ class ThemeManager:
                 except Exception:
                     pass
             elif widget_type == "Menubutton":
-                # Menubutton uses same styling as Button (with fallback)
+                # Menubutton uses same styling as Button
                 try:
-                    if "Button" in cached_configs:
-                        widget.configure(**cached_configs["Button"])
+                    widget.configure(**cached_configs["Button"])
                 except Exception:
                     pass
 
