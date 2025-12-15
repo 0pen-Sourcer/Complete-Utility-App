@@ -134,6 +134,11 @@ def get_resized_images_folder():
     os.makedirs(folder, exist_ok=True)
     return folder
 
+def get_watermarked_images_folder():
+    folder = os.path.join(get_base_folder(), "Watermarked Images")
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
 
 def get_converted_pdfs_folder():
     folder = os.path.join(get_base_folder(), "Converted PDFs")
@@ -166,6 +171,11 @@ def get_trimmed_video_folder():
 
 def get_qr_codes_folder():
     folder = os.path.join(get_base_folder(), "QR Codes")
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
+def get_screenshots_folder():
+    folder = os.path.join(get_base_folder(), "Screenshots")
     os.makedirs(folder, exist_ok=True)
     return folder
 
@@ -399,20 +409,20 @@ class SecurityManager:
             for filename, key in keys.items():
                 if old_fernet:
                     try:
-                    # MUST succeed if it's truly old ciphertext
+                        # MUST succeed if it's truly old ciphertext
                         decrypted = old_fernet.decrypt(key.encode()).decode()
                     except Exception as e:
-                    # If decryption fails, raise an error or log it
+                        # If decryption fails, raise an error or log it
                         raise ValueError(
-                        f"Failed to decrypt '{filename}' with old master password. "
-                        f"Data may be corrupted or the old password is incorrect.\n{e}"
+                            f"Failed to decrypt '{filename}' with old master password. "
+                            f"Data may be corrupted or the old password is incorrect.\n{e}"
                         )
                 else:
-                # If this is the very first time you’re encrypting plaintext keys
-                # (i.e., there is no old Fernet), treat them as plaintext.
+                    # If this is the very first time you're encrypting plaintext keys
+                    # (i.e., there is no old Fernet), treat them as plaintext.
                     decrypted = key
 
-            # Encrypt with the new Fernet
+                # Encrypt with the new Fernet
                 new_encrypted_keys[filename] = self.encrypt_key(decrypted)
 
             with open(KEYS_JSON, "w") as f:
@@ -535,17 +545,42 @@ class YouTubeFrame(BaseDownloadFrame):
         Button(final_btn_frame, text="Download Transcript", command=self.download_transcript).pack(side="left", padx=5)
 
     ###################################################
-    # 1. Simple Helper Function to Check YouTube Links #
+    # 1. Improved Helper Function to Check YouTube Links #
     ###################################################
     def is_valid_youtube_link(self, url):
-        # Convert to lowercase and strip whitespace
-        url = url.lower().strip()
-        # Must contain "youtube.com" or "youtu.be"
-        if "youtube.com" not in url and "youtu.be" not in url:
+        """Validate YouTube URL with improved pattern matching"""
+        url = url.strip()
+        
+        # Check if it's a valid URL format
+        if not url.startswith(('http://', 'https://', 'www.')):
             return False
-        # Must have either "?v=" (watch link) or "/shorts/"
-        if "?v=" in url or "/shorts/" in url or "youtu.be/" in url:
-            return True
+        
+        # Convert to lowercase for checking
+        url_lower = url.lower()
+        
+        # Must contain "youtube.com" or "youtu.be"
+        if "youtube.com" not in url_lower and "youtu.be" not in url_lower:
+            return False
+        
+        # Check for valid YouTube URL patterns
+        # Standard watch URL: youtube.com/watch?v=VIDEO_ID
+        # Short URL: youtu.be/VIDEO_ID
+        # Shorts URL: youtube.com/shorts/VIDEO_ID
+        # Embedded: youtube.com/embed/VIDEO_ID
+        # Live: youtube.com/live/VIDEO_ID
+        valid_patterns = [
+            r'youtube\.com/watch\?v=[\w-]+',
+            r'youtu\.be/[\w-]+',
+            r'youtube\.com/shorts/[\w-]+',
+            r'youtube\.com/embed/[\w-]+',
+            r'youtube\.com/live/[\w-]+'
+        ]
+        
+        import re
+        for pattern in valid_patterns:
+            if re.search(pattern, url_lower):
+                return True
+        
         return False
 
     def toggle_extra_options(self, event=None):
@@ -741,11 +776,12 @@ class MediaToolsFrame(Frame):
         img_btn_frame.pack(pady=5)
         Button(img_btn_frame, text="Convert Images to PDF", command=self.convert_images_to_pdf).pack(side="left", padx=5)
         Button(img_btn_frame, text="Resize Images", command=self.resize_images).pack(side="left", padx=5)
-        Button(img_btn_frame, text="Convert Image Format", command=self.convert_image_format).pack(side="left", padx=5)  # Add this line
+        Button(img_btn_frame, text="Convert Image Format", command=self.convert_image_format).pack(side="left", padx=5)
+        Button(img_btn_frame, text="Add Watermark", command=self.add_watermark).pack(side="left", padx=5)
         
         img_hint = Label(self, text="?", fg="blue", cursor="question_arrow")
         img_hint.pack(pady=5)
-        Tooltip(img_hint, "Convert multiple images to PDF, resize images, or convert image formats (JPG, PNG, BMP, GIF, WEBP, TIFF) in batch.")
+        Tooltip(img_hint, "Convert multiple images to PDF, resize images, convert image formats (JPG, PNG, BMP, GIF, WEBP, TIFF), or add watermarks in batch.")
 
         # PDF Tools Section
         Label(self, text="PDF Tools:", font=("Arial", 12)).pack(pady=(20,5))
@@ -987,6 +1023,115 @@ class MediaToolsFrame(Frame):
             
             Button(size_dialog, text="Resize", command=process_resize).pack(pady=10)
             Button(size_dialog, text="Cancel", command=size_dialog.destroy).pack(pady=5)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error: {e}")
+
+    def add_watermark(self):
+        """Add watermark to images"""
+        try:
+            from PIL import ImageDraw, ImageFont
+            
+            files = filedialog.askopenfilenames(
+                title="Select Images to Watermark",
+                filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp")]
+            )
+            if not files:
+                return
+            
+            # Create watermark dialog
+            watermark_dialog = Toplevel(self)
+            watermark_dialog.title("Add Watermark")
+            watermark_dialog.geometry("400x250")
+            ThemeManager.apply_theme(watermark_dialog, config.get("theme", "Classic"))
+            
+            Label(watermark_dialog, text="Enter watermark text:").pack(pady=5)
+            text_var = StringVar()
+            Entry(watermark_dialog, textvariable=text_var, width=40).pack(pady=5)
+            
+            Label(watermark_dialog, text="Position:").pack(pady=5)
+            position_var = StringVar(value="bottom-right")
+            ttk.Combobox(watermark_dialog, textvariable=position_var, 
+                        values=["top-left", "top-right", "bottom-left", "bottom-right", "center"],
+                        state="readonly").pack(pady=5)
+            
+            Label(watermark_dialog, text="Opacity (0-255):").pack(pady=5)
+            opacity_var = StringVar(value="128")
+            Entry(watermark_dialog, textvariable=opacity_var, width=10).pack(pady=5)
+            
+            def process_watermark():
+                try:
+                    watermark_text = text_var.get().strip()
+                    if not watermark_text:
+                        messagebox.showerror("Error", "Please enter watermark text")
+                        return
+                    
+                    position = position_var.get()
+                    opacity = int(opacity_var.get())
+                    
+                    if opacity < 0 or opacity > 255:
+                        messagebox.showerror("Error", "Opacity must be between 0 and 255")
+                        return
+                    
+                    output_folder = get_watermarked_images_folder()
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    
+                    for img_file in files:
+                        with Image.open(img_file) as img:
+                            # Convert to RGBA if not already
+                            if img.mode != 'RGBA':
+                                img = img.convert('RGBA')
+                            
+                            # Create a transparent layer for watermark
+                            txt_layer = Image.new('RGBA', img.size, (255, 255, 255, 0))
+                            draw = ImageDraw.Draw(txt_layer)
+                            
+                            # Try to use a nice font, fall back to default if not available
+                            try:
+                                font = ImageFont.truetype("arial.ttf", 36)
+                            except:
+                                font = ImageFont.load_default()
+                            
+                            # Calculate text position
+                            bbox = draw.textbbox((0, 0), watermark_text, font=font)
+                            text_width = bbox[2] - bbox[0]
+                            text_height = bbox[3] - bbox[1]
+                            
+                            if position == "top-left":
+                                text_pos = (10, 10)
+                            elif position == "top-right":
+                                text_pos = (img.width - text_width - 10, 10)
+                            elif position == "bottom-left":
+                                text_pos = (10, img.height - text_height - 10)
+                            elif position == "bottom-right":
+                                text_pos = (img.width - text_width - 10, img.height - text_height - 10)
+                            else:  # center
+                                text_pos = ((img.width - text_width) // 2, (img.height - text_height) // 2)
+                            
+                            # Draw watermark
+                            draw.text(text_pos, watermark_text, font=font, fill=(255, 255, 255, opacity))
+                            
+                            # Composite the watermark layer
+                            watermarked = Image.alpha_composite(img, txt_layer)
+                            
+                            # Convert back to RGB for saving as JPEG
+                            if watermarked.mode == 'RGBA':
+                                watermarked = watermarked.convert('RGB')
+                            
+                            output_path = os.path.join(output_folder, 
+                                                      f"watermarked_{timestamp}_{os.path.basename(img_file)}")
+                            watermarked.save(output_path)
+                    
+                    self.status_label.config(text=f"Watermarks added!\nSaved in: {output_folder}")
+                    watermark_dialog.destroy()
+                    
+                except ValueError:
+                    messagebox.showerror("Error", "Invalid opacity value")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Error adding watermark: {e}")
+            
+            Button(watermark_dialog, text="Apply", command=process_watermark).pack(pady=10)
+            Button(watermark_dialog, text="Cancel", command=watermark_dialog.destroy).pack(pady=5)
             
         except Exception as e:
             messagebox.showerror("Error", f"Error: {e}")
@@ -1482,6 +1627,27 @@ class ExtraToolsFrame(Frame):
             "Uses Google Text-to-Speech (gTTS) library."
         )
 
+        # --------------------------------------------------
+        # Screenshot Capture Frame
+        # --------------------------------------------------
+        screenshot_frame = Frame(self)
+        screenshot_frame.pack(pady=10, fill="x")
+
+        Label(screenshot_frame, text="Screenshot Capture:", font=("Arial", 12)).pack(pady=5)
+        
+        btn_screenshot = Frame(screenshot_frame)
+        btn_screenshot.pack(pady=5)
+        Button(btn_screenshot, text="Capture Full Screen", command=lambda: self.capture_screenshot("full")).pack(side="left", padx=5)
+        Button(btn_screenshot, text="Capture Region", command=lambda: self.capture_screenshot("region")).pack(side="left", padx=5)
+        
+        q_label_screenshot = Label(screenshot_frame, text="?", fg="blue", cursor="question_arrow")
+        q_label_screenshot.pack(pady=5)
+        Tooltip(
+            q_label_screenshot,
+            "Capture screenshots of your screen.\n"
+            "Full screen or select a specific region to capture."
+        )
+
     def select_image(self):
         file = filedialog.askopenfilename(
             title="Select an Image",
@@ -1638,6 +1804,85 @@ class ExtraToolsFrame(Frame):
             messagebox.showerror("Error", "Please install gTTS package: pip install gtts")
         except Exception as e:
             messagebox.showerror("Error", f"Error converting text to speech: {e}")
+
+    def capture_screenshot(self, mode="full"):
+        """Capture screenshot - full screen or region"""
+        try:
+            from PIL import ImageGrab
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_folder = get_screenshots_folder()
+            
+            if mode == "full":
+                # Capture full screen
+                screenshot = ImageGrab.grab()
+                output_path = os.path.join(output_folder, f"screenshot_{timestamp}.png")
+                screenshot.save(output_path)
+                messagebox.showinfo("Success", f"Screenshot saved!\nLocation: {output_path}")
+                
+            elif mode == "region":
+                # Create a selection dialog
+                messagebox.showinfo("Region Capture", 
+                    "Click OK, then click and drag to select the region to capture.\n"
+                    "The screenshot will be saved automatically.")
+                
+                # For simplicity, we'll use a basic approach
+                # In a production app, you'd want a more sophisticated region selector
+                region_dialog = Toplevel(self)
+                region_dialog.title("Enter Region Coordinates")
+                region_dialog.geometry("400x250")
+                ThemeManager.apply_theme(region_dialog, config.get("theme", "Classic"))
+                
+                Label(region_dialog, text="Enter region coordinates:").pack(pady=5)
+                
+                coord_frame = Frame(region_dialog)
+                coord_frame.pack(pady=5)
+                
+                Label(coord_frame, text="X1:").grid(row=0, column=0, padx=5)
+                x1_var = StringVar(value="0")
+                Entry(coord_frame, textvariable=x1_var, width=8).grid(row=0, column=1, padx=5)
+                
+                Label(coord_frame, text="Y1:").grid(row=0, column=2, padx=5)
+                y1_var = StringVar(value="0")
+                Entry(coord_frame, textvariable=y1_var, width=8).grid(row=0, column=3, padx=5)
+                
+                Label(coord_frame, text="X2:").grid(row=1, column=0, padx=5)
+                x2_var = StringVar(value="800")
+                Entry(coord_frame, textvariable=x2_var, width=8).grid(row=1, column=1, padx=5)
+                
+                Label(coord_frame, text="Y2:").grid(row=1, column=2, padx=5)
+                y2_var = StringVar(value="600")
+                Entry(coord_frame, textvariable=y2_var, width=8).grid(row=1, column=3, padx=5)
+                
+                Label(region_dialog, text="(X1,Y1) is top-left, (X2,Y2) is bottom-right", 
+                      font=("Arial", 8)).pack(pady=5)
+                
+                def capture_region():
+                    try:
+                        x1 = int(x1_var.get())
+                        y1 = int(y1_var.get())
+                        x2 = int(x2_var.get())
+                        y2 = int(y2_var.get())
+                        
+                        screenshot = ImageGrab.grab(bbox=(x1, y1, x2, y2))
+                        output_path = os.path.join(output_folder, f"screenshot_region_{timestamp}.png")
+                        screenshot.save(output_path)
+                        
+                        messagebox.showinfo("Success", f"Region screenshot saved!\nLocation: {output_path}")
+                        region_dialog.destroy()
+                        
+                    except ValueError:
+                        messagebox.showerror("Error", "Please enter valid integer coordinates")
+                    except Exception as e:
+                        messagebox.showerror("Error", f"Error capturing region: {e}")
+                
+                Button(region_dialog, text="Capture", command=capture_region).pack(pady=10)
+                Button(region_dialog, text="Cancel", command=region_dialog.destroy).pack(pady=5)
+                
+        except ImportError:
+            messagebox.showerror("Error", "Screenshot capture requires PIL/Pillow")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error capturing screenshot: {e}")
 
 
 
