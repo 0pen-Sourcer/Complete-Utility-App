@@ -1432,7 +1432,8 @@ class ExtraToolsFrame(Frame):
         
         def encrypt_thread():
             try:
-                # Encrypt entire file (Fernet requires full data for encryption)
+                # Read and encrypt entire file for simplicity
+                # Note: For very large files, consider using chunked encryption with a different cipher
                 fernet = Fernet(key)
                 enc_file = os.path.join(get_encryption_folder(), os.path.basename(file) + ".enc")
                 
@@ -1474,7 +1475,8 @@ class ExtraToolsFrame(Frame):
         
         def decrypt_thread():
             try:
-                # Decrypt entire file (Fernet requires full data for decryption)
+                # Read and decrypt entire file for simplicity
+                # Note: For very large files, consider using chunked decryption with a different cipher
                 fernet = Fernet(key.encode())
                 dec_file = file.rsplit(".enc", 1)[0]
                 
@@ -1489,12 +1491,13 @@ class ExtraToolsFrame(Frame):
 
                 self.after(0, lambda: self.enc_status.config(text=f"Decrypted: {os.path.basename(dec_file)}"))
                 
-                # Open file in the main thread
+                # Open file safely in the main thread
                 def open_file():
                     if os.name == 'nt':
                         os.startfile(dec_file)
                     else:
-                        os.system(f"open {dec_file}")
+                        import subprocess
+                        subprocess.run(['open', dec_file], check=False)
                 
                 self.after(0, open_file)
                 
