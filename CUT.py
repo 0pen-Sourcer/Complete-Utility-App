@@ -1644,6 +1644,63 @@ class ExtraToolsFrame(Frame):
             "Full screen or select a specific region to capture."
         )
 
+        # --------------------------------------------------
+        # Hash Calculator Frame
+        # --------------------------------------------------
+        hash_frame = Frame(self)
+        hash_frame.pack(pady=10, fill="x")
+
+        Label(hash_frame, text="Hash Calculator:", font=("Arial", 12)).pack(pady=5)
+        
+        btn_hash = Frame(hash_frame)
+        btn_hash.pack(pady=5)
+        Button(btn_hash, text="Calculate File Hash", command=self.calculate_file_hash).pack(side="left", padx=5)
+        Button(btn_hash, text="Calculate Text Hash", command=self.calculate_text_hash).pack(side="left", padx=5)
+        
+        q_label_hash = Label(hash_frame, text="?", fg="blue", cursor="question_arrow")
+        q_label_hash.pack(pady=5)
+        Tooltip(
+            q_label_hash,
+            "Calculate cryptographic hashes (MD5, SHA1, SHA256, SHA512)\n"
+            "for files or text strings."
+        )
+
+        # --------------------------------------------------
+        # Password Generator Frame
+        # --------------------------------------------------
+        pwd_gen_frame = Frame(self)
+        pwd_gen_frame.pack(pady=10, fill="x")
+
+        Label(pwd_gen_frame, text="Password Generator:", font=("Arial", 12)).pack(pady=5)
+        
+        Button(pwd_gen_frame, text="Generate Strong Password", command=self.generate_password).pack(pady=5)
+        
+        q_label_pwd = Label(pwd_gen_frame, text="?", fg="blue", cursor="question_arrow")
+        q_label_pwd.pack(pady=5)
+        Tooltip(
+            q_label_pwd,
+            "Generate strong, secure passwords with customizable length\n"
+            "and character sets (uppercase, lowercase, numbers, symbols)."
+        )
+
+        # --------------------------------------------------
+        # Color Picker Frame
+        # --------------------------------------------------
+        color_frame = Frame(self)
+        color_frame.pack(pady=10, fill="x")
+
+        Label(color_frame, text="Color Picker:", font=("Arial", 12)).pack(pady=5)
+        
+        Button(color_frame, text="Pick Color", command=self.pick_color).pack(pady=5)
+        
+        q_label_color = Label(color_frame, text="?", fg="blue", cursor="question_arrow")
+        q_label_color.pack(pady=5)
+        Tooltip(
+            q_label_color,
+            "Pick a color and get its HEX, RGB, and HSV values.\n"
+            "Copy color codes to clipboard for use in design."
+        )
+
     def select_image(self):
         file = filedialog.askopenfilename(
             title="Select an Image",
@@ -1889,6 +1946,263 @@ class ExtraToolsFrame(Frame):
             messagebox.showerror("Error", "Screenshot capture requires PIL/Pillow")
         except Exception as e:
             messagebox.showerror("Error", f"Error capturing screenshot: {e}")
+
+    def calculate_file_hash(self):
+        """Calculate hash of a file"""
+        try:
+            file_path = filedialog.askopenfilename(
+                title="Select File to Hash",
+                filetypes=[("All files", "*.*")]
+            )
+            
+            if not file_path:
+                return
+            
+            # Create hash selection dialog
+            hash_dialog = Toplevel(self)
+            hash_dialog.title("Calculate File Hash")
+            hash_dialog.geometry("500x350")
+            ThemeManager.apply_theme(hash_dialog, config.get("theme", "Classic"))
+            
+            Label(hash_dialog, text=f"File: {os.path.basename(file_path)}", font=("Arial", 10, "bold")).pack(pady=5)
+            
+            # Calculate all hash types
+            hash_results = {}
+            algorithms = ['md5', 'sha1', 'sha256', 'sha512']
+            
+            Label(hash_dialog, text="Calculating hashes...").pack(pady=5)
+            hash_dialog.update()
+            
+            for algo in algorithms:
+                hash_obj = hashlib.new(algo)
+                with open(file_path, 'rb') as f:
+                    while chunk := f.read(8192):
+                        hash_obj.update(chunk)
+                hash_results[algo.upper()] = hash_obj.hexdigest()
+            
+            # Display results
+            result_frame = Frame(hash_dialog)
+            result_frame.pack(pady=10, fill="both", expand=True, padx=10)
+            
+            for algo, hash_value in hash_results.items():
+                algo_frame = Frame(result_frame)
+                algo_frame.pack(fill="x", pady=2)
+                
+                Label(algo_frame, text=f"{algo}:", font=("Arial", 9, "bold"), width=8, anchor="w").pack(side="left")
+                
+                hash_entry = Entry(algo_frame, width=70)
+                hash_entry.insert(0, hash_value)
+                hash_entry.config(state="readonly")
+                hash_entry.pack(side="left", padx=5)
+                
+                Button(algo_frame, text="Copy", 
+                      command=lambda h=hash_value: self.copy_to_clipboard(h)).pack(side="left")
+            
+            Button(hash_dialog, text="Close", command=hash_dialog.destroy).pack(pady=10)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error calculating hash: {e}")
+
+    def calculate_text_hash(self):
+        """Calculate hash of text"""
+        try:
+            # Create text hash dialog
+            hash_dialog = Toplevel(self)
+            hash_dialog.title("Calculate Text Hash")
+            hash_dialog.geometry("500x400")
+            ThemeManager.apply_theme(hash_dialog, config.get("theme", "Classic"))
+            
+            Label(hash_dialog, text="Enter text to hash:").pack(pady=5)
+            
+            text_input = Text(hash_dialog, height=5, width=60)
+            text_input.pack(pady=5, padx=10)
+            
+            result_frame = Frame(hash_dialog)
+            result_frame.pack(pady=10, fill="both", expand=True, padx=10)
+            
+            def calculate():
+                text = text_input.get("1.0", "end-1c")
+                if not text:
+                    messagebox.showwarning("Warning", "Please enter some text")
+                    return
+                
+                # Clear previous results
+                for widget in result_frame.winfo_children():
+                    widget.destroy()
+                
+                # Calculate hashes
+                algorithms = ['md5', 'sha1', 'sha256', 'sha512']
+                for algo in algorithms:
+                    hash_obj = hashlib.new(algo)
+                    hash_obj.update(text.encode('utf-8'))
+                    hash_value = hash_obj.hexdigest()
+                    
+                    algo_frame = Frame(result_frame)
+                    algo_frame.pack(fill="x", pady=2)
+                    
+                    Label(algo_frame, text=f"{algo.upper()}:", font=("Arial", 9, "bold"), 
+                         width=8, anchor="w").pack(side="left")
+                    
+                    hash_entry = Entry(algo_frame, width=60)
+                    hash_entry.insert(0, hash_value)
+                    hash_entry.config(state="readonly")
+                    hash_entry.pack(side="left", padx=5)
+                    
+                    Button(algo_frame, text="Copy", 
+                          command=lambda h=hash_value: self.copy_to_clipboard(h)).pack(side="left")
+            
+            Button(hash_dialog, text="Calculate", command=calculate).pack(pady=5)
+            Button(hash_dialog, text="Close", command=hash_dialog.destroy).pack(pady=5)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error calculating hash: {e}")
+
+    def copy_to_clipboard(self, text):
+        """Helper method to copy text to clipboard"""
+        self.clipboard_clear()
+        self.clipboard_append(text)
+        messagebox.showinfo("Copied", "Hash copied to clipboard!")
+
+    def generate_password(self):
+        """Generate a strong password"""
+        try:
+            import string
+            import secrets
+            
+            # Create password generator dialog
+            pwd_dialog = Toplevel(self)
+            pwd_dialog.title("Password Generator")
+            pwd_dialog.geometry("450x400")
+            ThemeManager.apply_theme(pwd_dialog, config.get("theme", "Classic"))
+            
+            Label(pwd_dialog, text="Password Generator", font=("Arial", 14, "bold")).pack(pady=10)
+            
+            # Options frame
+            options_frame = Frame(pwd_dialog)
+            options_frame.pack(pady=10)
+            
+            Label(options_frame, text="Password Length:").grid(row=0, column=0, padx=5, sticky="w")
+            length_var = StringVar(value="16")
+            Entry(options_frame, textvariable=length_var, width=10).grid(row=0, column=1, padx=5)
+            
+            uppercase_var = BooleanVar(value=True)
+            lowercase_var = BooleanVar(value=True)
+            numbers_var = BooleanVar(value=True)
+            symbols_var = BooleanVar(value=True)
+            
+            Checkbutton(options_frame, text="Uppercase (A-Z)", variable=uppercase_var).grid(row=1, column=0, sticky="w", pady=2)
+            Checkbutton(options_frame, text="Lowercase (a-z)", variable=lowercase_var).grid(row=2, column=0, sticky="w", pady=2)
+            Checkbutton(options_frame, text="Numbers (0-9)", variable=numbers_var).grid(row=3, column=0, sticky="w", pady=2)
+            Checkbutton(options_frame, text="Symbols (!@#$...)", variable=symbols_var).grid(row=4, column=0, sticky="w", pady=2)
+            
+            # Result frame
+            Label(pwd_dialog, text="Generated Password:").pack(pady=(10, 5))
+            password_var = StringVar()
+            password_entry = Entry(pwd_dialog, textvariable=password_var, width=50, font=("Courier", 10))
+            password_entry.pack(pady=5, padx=10)
+            
+            def generate():
+                try:
+                    length = int(length_var.get())
+                    if length < 4 or length > 128:
+                        messagebox.showerror("Error", "Password length must be between 4 and 128")
+                        return
+                    
+                    char_sets = []
+                    if uppercase_var.get():
+                        char_sets.append(string.ascii_uppercase)
+                    if lowercase_var.get():
+                        char_sets.append(string.ascii_lowercase)
+                    if numbers_var.get():
+                        char_sets.append(string.digits)
+                    if symbols_var.get():
+                        char_sets.append(string.punctuation)
+                    
+                    if not char_sets:
+                        messagebox.showerror("Error", "Please select at least one character type")
+                        return
+                    
+                    # Combine all character sets
+                    all_chars = ''.join(char_sets)
+                    
+                    # Generate password
+                    password = ''.join(secrets.choice(all_chars) for _ in range(length))
+                    
+                    # Ensure at least one character from each selected set
+                    if len(char_sets) > 1:
+                        password_list = list(password)
+                        for char_set in char_sets:
+                            password_list[secrets.randbelow(length)] = secrets.choice(char_set)
+                        password = ''.join(password_list)
+                    
+                    password_var.set(password)
+                    
+                except ValueError:
+                    messagebox.showerror("Error", "Please enter a valid password length")
+            
+            btn_frame = Frame(pwd_dialog)
+            btn_frame.pack(pady=10)
+            
+            Button(btn_frame, text="Generate", command=generate).pack(side="left", padx=5)
+            Button(btn_frame, text="Copy", 
+                  command=lambda: self.copy_to_clipboard(password_var.get()) if password_var.get() else None).pack(side="left", padx=5)
+            Button(btn_frame, text="Close", command=pwd_dialog.destroy).pack(side="left", padx=5)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error generating password: {e}")
+
+    def pick_color(self):
+        """Color picker tool"""
+        try:
+            from tkinter import colorchooser
+            import colorsys
+            
+            # Open color chooser
+            color = colorchooser.askcolor(title="Pick a Color")
+            
+            if color[1]:  # If a color was selected
+                rgb = color[0]
+                hex_color = color[1]
+                
+                # Calculate HSV
+                hsv = colorsys.rgb_to_hsv(rgb[0]/255, rgb[1]/255, rgb[2]/255)
+                
+                # Create result dialog
+                color_dialog = Toplevel(self)
+                color_dialog.title("Color Information")
+                color_dialog.geometry("400x300")
+                ThemeManager.apply_theme(color_dialog, config.get("theme", "Classic"))
+                
+                Label(color_dialog, text="Color Information", font=("Arial", 14, "bold")).pack(pady=10)
+                
+                # Color preview
+                preview_frame = Frame(color_dialog, bg=hex_color, width=200, height=100, relief="solid", borderwidth=2)
+                preview_frame.pack(pady=10)
+                preview_frame.pack_propagate(False)
+                
+                # Color values
+                info_frame = Frame(color_dialog)
+                info_frame.pack(pady=10, padx=20, fill="x")
+                
+                def create_color_row(label, value):
+                    row = Frame(info_frame)
+                    row.pack(fill="x", pady=3)
+                    Label(row, text=label, font=("Arial", 10, "bold"), width=10, anchor="w").pack(side="left")
+                    entry = Entry(row, width=30)
+                    entry.insert(0, value)
+                    entry.config(state="readonly")
+                    entry.pack(side="left", padx=5)
+                    Button(row, text="Copy", command=lambda v=value: self.copy_to_clipboard(v)).pack(side="left")
+                
+                create_color_row("HEX:", hex_color)
+                create_color_row("RGB:", f"rgb({int(rgb[0])}, {int(rgb[1])}, {int(rgb[2])})")
+                create_color_row("HSV:", f"hsv({int(hsv[0]*360)}°, {int(hsv[1]*100)}%, {int(hsv[2]*100)}%)")
+                
+                Button(color_dialog, text="Pick Another Color", command=lambda: [color_dialog.destroy(), self.pick_color()]).pack(pady=5)
+                Button(color_dialog, text="Close", command=color_dialog.destroy).pack(pady=5)
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Error picking color: {e}")
 
 
 

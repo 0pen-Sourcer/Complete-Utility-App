@@ -55,12 +55,17 @@ CUT brings together tools you'd normally need 10+ apps for — in a clean, unifi
 - 📲 QR code generation with customizable size.
 - 🗣️ Text-to-Speech conversion (save as MP3).
 - 📸 Screenshot capture (full screen or custom region).
+- 🔐 Hash calculator (MD5, SHA1, SHA256, SHA512) for files and text.
+- 🔑 Password generator with customizable length and character sets.
+- 🎨 Color picker with HEX, RGB, and HSV values.
 - 🎨 Customizable themes with ability to create your own.
 
 ### 🔑 Security
 - 🔐 Master password protection for safeguarding sensitive data.
 - 📂 Encrypted storage for files and keys.
 - 🔑 Key revelation with password verification.
+- 🛡️ Secure password generation with cryptographically strong randomness.
+- 🔒 File integrity verification with hash calculation.
 
 
 > 👇 **Want to see CUT in action? Check out the GIF previews of key features below.**
