@@ -569,7 +569,6 @@ class YouTubeFrame(BaseDownloadFrame):
             r'youtube\.com/live/[\w-]+'
         ]
         
-        import re
         for pattern in valid_patterns:
             if re.search(pattern, url_lower):
                 return True
@@ -1123,7 +1122,7 @@ class MediaToolsFrame(Frame):
                             # Try to use a nice font, fall back to default if not available
                             try:
                                 font = ImageFont.truetype("arial.ttf", 36)
-                            except:
+                            except (OSError, IOError):
                                 font = ImageFont.load_default()
                             
                             # Calculate text position
@@ -1389,9 +1388,17 @@ class MediaToolsFrame(Frame):
                     if not start_time_str or not end_time_str:
                         messagebox.showerror("Error", "Please enter both start and end times")
                         return
+                    
+                    # Validate time format (MM:SS or HH:MM:SS)
+                    time_pattern = r"^(?:\d{1,2}:)?[0-5]?\d:[0-5]\d$"
+                    if not re.match(time_pattern, start_time_str):
+                        messagebox.showerror("Error", "Start time must be in MM:SS or HH:MM:SS format (e.g., 01:23 or 1:02:03)")
+                        return
+                    if not re.match(time_pattern, end_time_str):
+                        messagebox.showerror("Error", "End time must be in MM:SS or HH:MM:SS format (e.g., 01:23 or 1:02:03)")
+                        return
 
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    file_ext = os.path.splitext(file_path)[1]
                     output_path = os.path.join(get_trimmed_video_folder(), 
                                              f"trimmed_{timestamp}_{os.path.basename(file_path)}")
                     
@@ -1592,9 +1599,20 @@ class MediaToolsFrame(Frame):
             if not output_dir:
                 return
             
-            # Extract the ZIP file
+            # Extract the ZIP file securely (prevent zip slip)
             with zipfile.ZipFile(zip_file, 'r') as zipf:
-                zipf.extractall(output_dir)
+                for member in zipf.namelist():
+                    member_path = os.path.normpath(member)
+                    dest_path = os.path.abspath(os.path.join(output_dir, member_path))
+                    if not dest_path.startswith(os.path.abspath(output_dir) + os.sep):
+                        raise Exception(f"Unsafe ZIP entry detected: {member}")
+                    if member.endswith('/'):
+                        # Directory entry
+                        os.makedirs(dest_path, exist_ok=True)
+                    else:
+                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                        with zipf.open(member) as source, open(dest_path, "wb") as target:
+                            target.write(source.read())
             
             self.status_label.config(text=f"ZIP archive extracted successfully!\nLocation: {output_dir}")
             
@@ -2143,6 +2161,12 @@ class ExtraToolsFrame(Frame):
             
             Label(hash_dialog, text=f"File: {os.path.basename(file_path)}", font=("Arial", 10, "bold")).pack(pady=5)
             
+            # Add security warning about MD5
+            warning_label = Label(hash_dialog, 
+                                text="⚠️ Note: MD5 is provided for checksums only. Use SHA-256 or SHA-512 for security validation.",
+                                font=("Arial", 8), fg="orange", wraplength=450)
+            warning_label.pack(pady=5)
+            
             # Calculate all hash types
             hash_results = {}
             algorithms = ['md5', 'sha1', 'sha256', 'sha512']
@@ -2302,15 +2326,21 @@ class ExtraToolsFrame(Frame):
                     # Combine all character sets
                     all_chars = ''.join(char_sets)
                     
-                    # Generate password
-                    password = ''.join(secrets.choice(all_chars) for _ in range(length))
+                    # Generate password with better entropy
+                    # First, ensure at least one character from each selected set
+                    password_list = []
+                    for char_set in char_sets:
+                        password_list.append(secrets.choice(char_set))
                     
-                    # Ensure at least one character from each selected set
-                    if len(char_sets) > 1:
-                        password_list = list(password)
-                        for char_set in char_sets:
-                            password_list[secrets.randbelow(length)] = secrets.choice(char_set)
-                        password = ''.join(password_list)
+                    # Fill remaining positions with random characters
+                    remaining_length = length - len(password_list)
+                    for _ in range(remaining_length):
+                        password_list.append(secrets.choice(all_chars))
+                    
+                    # Shuffle the password using cryptographically secure random
+                    rng = secrets.SystemRandom()
+                    rng.shuffle(password_list)
+                    password = ''.join(password_list)
                     
                     password_var.set(password)
                     
@@ -2547,8 +2577,8 @@ class ExtraToolsFrame(Frame):
                             self.after(0, lambda i=idx: progress_label.config(
                                 text=f"Scanning file {i+1} of {total_files}..."))
                             
-                            # Calculate file hash
-                            file_hash = hashlib.md5()
+                            # Calculate file hash using SHA-256 for better collision resistance
+                            file_hash = hashlib.sha256()
                             with open(file_path, 'rb') as f:
                                 while chunk := f.read(8192):
                                     file_hash.update(chunk)
@@ -2675,11 +2705,16 @@ class ExtraToolsFrame(Frame):
                 info.append(f"CPU Count (Physical): {psutil.cpu_count(logical=False)}")
                 info.append(f"CPU Usage: {psutil.cpu_percent(interval=1)}%")
                 
-                # Disk info
-                disk = psutil.disk_usage('/')
-                info.append(f"\nDisk Total: {disk.total / (1024**3):.2f} GB")
-                info.append(f"Disk Used: {disk.used / (1024**3):.2f} GB ({disk.percent}%)")
-                info.append(f"Disk Free: {disk.free / (1024**3):.2f} GB")
+                # Disk info - use first available partition for cross-platform compatibility
+                partitions = psutil.disk_partitions()
+                if partitions:
+                    # Use the first partition's mountpoint
+                    disk = psutil.disk_usage(partitions[0].mountpoint)
+                    info.append(f"\nDisk Total: {disk.total / (1024**3):.2f} GB")
+                    info.append(f"Disk Used: {disk.used / (1024**3):.2f} GB ({disk.percent}%)")
+                    info.append(f"Disk Free: {disk.free / (1024**3):.2f} GB")
+                else:
+                    info.append("\nDisk information not available.")
                 
             except ImportError:
                 info.append("\n(Install psutil for detailed resource information)")
