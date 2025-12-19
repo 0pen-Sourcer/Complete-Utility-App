@@ -29,27 +29,47 @@
 ---
 
 ## 🌟 Features
-CUT brings together tools you’d normally need 10 apps for — in a clean, unified experience.
+CUT brings together tools you'd normally need 10+ apps for — in a clean, unified experience.
 
 ### 🔗 YouTube Tools
-- 📥 Download videos in various resolutions and formats.
-- 🎵 Extract audio directly from videos.
-- 📄 Transcribe videos using built-in tools.
+- 📥 Download videos in various resolutions (144p to 8K) and formats (MP4, WEBM).
+- 🎵 Extract audio directly from videos with quality options (128, 192, 320 kbps).
+- 📄 Transcribe videos using built-in tools with fallback to audio-based transcription.
+- ⚡ Support for standard YouTube videos, Shorts, embeds, and live streams.
 
 ### 🖼️ Media Tools
-- 📸 Convert image formats, resize images, and create PDFs from images.
-- 📄 Merge, split, and manage PDF files.
-- 🔄 Batch rename files with ease.
+- 📸 Convert image formats between JPG, PNG, BMP, GIF, WEBP, and TIFF.
+- 🎨 Add watermarks to images with customizable text, position, and opacity.
+- 📐 Resize images in batch with custom dimensions.
+- 📄 Convert multiple images to PDF format.
+- 📑 Merge multiple PDFs into a single file.
+- ✂️ Split PDFs by page ranges.
+- 🎵 Trim audio files (MP3, WAV, OGG, M4A) by time.
+- 🎬 Trim video files (MP4, AVI, MKV) using ffmpeg.
+- 🔄 Batch rename files with numeric or alphabetic schemes.
+- 🗜️ Create and extract ZIP archives from files and folders.
 
 ### 🧰 Extra Tools
 - 🔍 OCR (Powered by Tesseract) for text extraction from images.
 - 🔒 File encryption and decryption for securing sensitive files.
-- 📲 QR code generation.
-- 🎨 Customizable themes for personalized experience.
+- 📲 QR code generation with customizable size.
+- 🗣️ Text-to-Speech conversion (save as MP3).
+- 📸 Screenshot capture (full screen or custom region).
+- 🔐 Hash calculator (MD5, SHA1, SHA256, SHA512) for files and text.
+- 🔑 Password generator with customizable length and character sets.
+- 🎨 Color picker with HEX, RGB, and HSV values.
+- 🔄 Unit converter (Length, Weight, Temperature, Volume, Data, Time).
+- 🔍 Duplicate file finder with hash-based comparison.
+- 💻 System information viewer with detailed specs.
+- 🎨 Customizable themes with ability to create your own.
 
 ### 🔑 Security
 - 🔐 Master password protection for safeguarding sensitive data.
 - 📂 Encrypted storage for files and keys.
+- 🔑 Key revelation with password verification.
+- 🛡️ Secure password generation with cryptographically strong randomness.
+- 🔒 File integrity verification with hash calculation.
+
 
 > 👇 **Want to see CUT in action? Check out the GIF previews of key features below.**
 
