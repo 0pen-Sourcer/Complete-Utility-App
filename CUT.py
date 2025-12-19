@@ -1389,8 +1389,10 @@ class MediaToolsFrame(Frame):
                         messagebox.showerror("Error", "Please enter both start and end times")
                         return
                     
-                    # Validate time format (MM:SS or HH:MM:SS)
-                    time_pattern = r"^(?:\d{1,2}:)?[0-5]?\d:[0-5]\d$"
+                    # Validate time format (MM:SS or HH:MM:SS with proper hour validation)
+                    # MM:SS pattern: [0-5]?\d:[0-5]\d (0-59 minutes and seconds)
+                    # HH:MM:SS pattern: (?:[01]?\d|2[0-3]):[0-5]\d:[0-5]\d (0-23 hours, 0-59 minutes/seconds)
+                    time_pattern = r"^(?:(?:[01]?\d|2[0-3]):[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)$"
                     if not re.match(time_pattern, start_time_str):
                         messagebox.showerror("Error", "Start time must be in MM:SS or HH:MM:SS format (e.g., 01:23 or 1:02:03)")
                         return
@@ -1601,11 +1603,18 @@ class MediaToolsFrame(Frame):
             
             # Extract the ZIP file securely (prevent zip slip)
             with zipfile.ZipFile(zip_file, 'r') as zipf:
+                output_dir_abs = os.path.abspath(output_dir)
                 for member in zipf.namelist():
                     member_path = os.path.normpath(member)
                     dest_path = os.path.abspath(os.path.join(output_dir, member_path))
-                    if not dest_path.startswith(os.path.abspath(output_dir) + os.sep):
-                        raise Exception(f"Unsafe ZIP entry detected: {member}")
+                    # Use commonpath for cross-platform security check
+                    try:
+                        common = os.path.commonpath([output_dir_abs, dest_path])
+                        if common != output_dir_abs:
+                            raise ValueError(f"Unsafe ZIP entry detected: {member}")
+                    except ValueError:
+                        raise ValueError(f"Unsafe ZIP entry detected: {member}")
+                    
                     if member.endswith('/'):
                         # Directory entry
                         os.makedirs(dest_path, exist_ok=True)
