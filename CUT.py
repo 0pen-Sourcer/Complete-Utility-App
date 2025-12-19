@@ -885,18 +885,29 @@ class MediaToolsFrame(Frame):
                     pil_format = "JPEG"
                 else:
                     pil_format = selected_format.upper()
-
-                output_folder = get_converted_pdfs_folder()  # Adjust to your desired folder
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_file_name = f"converted_{timestamp}.{selected_format}"
-                output_path = os.path.join(output_folder, output_file_name)
-
-                # Open the image and convert it
-                with Image.open(file_path) as img:
-                    img.save(output_path, format=pil_format)  # Save in the selected format
-
-                self.status_label.config(text=f"Image converted to {pil_format}!\nSaved as: {output_path}")
+                
+                # Show processing state and close dialog
+                self.status_label.config(text="Converting image...")
+                self.update()
                 format_dialog.destroy()
+                
+                def convert_thread():
+                    try:
+                        output_folder = get_converted_pdfs_folder()  # Adjust to your desired folder
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        output_file_name = f"converted_{timestamp}.{selected_format}"
+                        output_path = os.path.join(output_folder, output_file_name)
+
+                        # Open the image and convert it
+                        with Image.open(file_path) as img:
+                            img.save(output_path, format=pil_format)  # Save in the selected format
+
+                        self.after(0, lambda: self.status_label.config(text=f"Image converted to {pil_format}!\nSaved as: {output_path}"))
+                    except Exception as e:
+                        self.after(0, lambda: messagebox.showerror("Error", f"Error: {e}"))
+                        self.after(0, lambda: self.status_label.config(text=""))
+                
+                threading.Thread(target=convert_thread, daemon=True).start()
 
             Button(format_dialog, text="Convert", command=process_conversion).pack(pady=10)
             Button(format_dialog, text="Cancel", command=format_dialog.destroy).pack(pady=5)
@@ -952,15 +963,29 @@ class MediaToolsFrame(Frame):
             )
             if not files:
                 return
-                
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_pdf = os.path.join(get_converted_pdfs_folder(), f"converted_{timestamp}.pdf")
-                
-            with open(output_pdf, "wb") as f:
-                f.write(img2pdf.convert([f for f in files]))
-            self.status_label.config(text=f"Images converted to PDF!\nSaved as: {output_pdf}")
+            
+            # Show processing state
+            self.status_label.config(text="Converting images to PDF...")
+            self.update()
+            
+            def convert_thread():
+                try:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    output_pdf = os.path.join(get_converted_pdfs_folder(), f"converted_{timestamp}.pdf")
+                    
+                    with open(output_pdf, "wb") as f:
+                        f.write(img2pdf.convert([f for f in files]))
+                    
+                    self.after(0, lambda: self.status_label.config(text=f"Images converted to PDF!\nSaved as: {output_pdf}"))
+                except Exception as e:
+                    self.after(0, lambda: messagebox.showerror("Error", f"Error: {e}"))
+                    self.after(0, lambda: self.status_label.config(text=""))
+            
+            threading.Thread(target=convert_thread, daemon=True).start()
+            
         except Exception as e:
             messagebox.showerror("Error", f"Error: {e}")
+            self.status_label.config(text="")
 
     def resize_images(self):
         try:
@@ -1000,14 +1025,25 @@ class MediaToolsFrame(Frame):
                     output_folder = get_resized_images_folder()
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     
-                    for img_file in files:
-                        with Image.open(img_file) as img:
-                            resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
-                            output_path = os.path.join(output_folder, f"resized_{timestamp}_{os.path.basename(img_file)}")
-                            resized_img.save(output_path)
+                    # Process in a separate thread to avoid blocking UI
+                    def resize_images_thread():
+                        try:
+                            for i, img_file in enumerate(files):
+                                with Image.open(img_file) as img:
+                                    resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
+                                    output_path = os.path.join(output_folder, f"resized_{timestamp}_{os.path.basename(img_file)}")
+                                    resized_img.save(output_path)
+                            
+                            # Update UI in main thread
+                            self.after(0, lambda: self.status_label.config(text=f"Images resized and saved in:\n{output_folder}"))
+                            self.after(0, size_dialog.destroy)
+                        except Exception as e:
+                            self.after(0, lambda: messagebox.showerror("Error", f"Error resizing images: {e}"))
                     
-                    self.status_label.config(text=f"Images resized and saved in:\n{output_folder}")
+                    # Show processing message
+                    self.status_label.config(text="Resizing images...")
                     size_dialog.destroy()
+                    threading.Thread(target=resize_images_thread, daemon=True).start()
                     
                 except ValueError:
                     messagebox.showerror("Error", "Please enter valid numbers for dimensions")
@@ -1140,21 +1176,34 @@ class MediaToolsFrame(Frame):
             )
             if not files:
                 return
-                
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_pdf = os.path.join(get_merged_pdfs_folder(), f"merged_{timestamp}.pdf")
-                
-            merger = PdfMerger()
-            for pdf in files:
-                merger.append(pdf)
-                
-            with open(output_pdf, "wb") as merged_pdf:
-                merger.write(merged_pdf)
-            merger.close()
             
-            self.status_label.config(text=f"PDFs merged!\nSaved as: {output_pdf}")
+            # Show processing state
+            self.status_label.config(text="Merging PDFs...")
+            self.update()
+            
+            def merge_thread():
+                try:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    output_pdf = os.path.join(get_merged_pdfs_folder(), f"merged_{timestamp}.pdf")
+                    
+                    merger = PdfMerger()
+                    for pdf in files:
+                        merger.append(pdf)
+                    
+                    with open(output_pdf, "wb") as merged_pdf:
+                        merger.write(merged_pdf)
+                    merger.close()
+                    
+                    self.after(0, lambda: self.status_label.config(text=f"PDFs merged!\nSaved as: {output_pdf}"))
+                except Exception as e:
+                    self.after(0, lambda: messagebox.showerror("Error", f"Error: {e}"))
+                    self.after(0, lambda: self.status_label.config(text=""))
+            
+            threading.Thread(target=merge_thread, daemon=True).start()
+            
         except Exception as e:
             messagebox.showerror("Error", f"Error: {e}")
+            self.status_label.config(text="")
 
     def split_pdf(self):
         try:
@@ -1183,28 +1232,39 @@ class MediaToolsFrame(Frame):
                         messagebox.showerror("Error", "Please enter page ranges")
                         return
                     
-                    output_folder = get_split_pdfs_folder()
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    
-                    ranges = []
-                    for r in ranges_text.split(','):
-                        start, end = map(int, r.split('-'))
-                        ranges.append((start-1, end))
-                    
-                    from PyPDF2 import PdfReader, PdfWriter
-                    pdf = PdfReader(file_path)
-                    
-                    for i, (start, end) in enumerate(ranges):
-                        writer = PdfWriter()
-                        for page_num in range(start, end):
-                            writer.add_page(pdf.pages[page_num])
-                        
-                        output_path = os.path.join(output_folder, f"split_{timestamp}_part{i+1}.pdf")
-                        with open(output_path, 'wb') as output_file:
-                            writer.write(output_file)
-                    
-                    self.status_label.config(text=f"PDF split into {len(ranges)} files in:\n{output_folder}")
+                    # Show processing state
                     split_dialog.destroy()
+                    self.status_label.config(text="Splitting PDF...")
+                    self.update()
+                    
+                    def split_thread():
+                        try:
+                            output_folder = get_split_pdfs_folder()
+                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            
+                            ranges = []
+                            for r in ranges_text.split(','):
+                                start, end = map(int, r.split('-'))
+                                ranges.append((start-1, end))
+                            
+                            from PyPDF2 import PdfReader, PdfWriter
+                            pdf = PdfReader(file_path)
+                            
+                            for i, (start, end) in enumerate(ranges):
+                                writer = PdfWriter()
+                                for page_num in range(start, end):
+                                    writer.add_page(pdf.pages[page_num])
+                                
+                                output_path = os.path.join(output_folder, f"split_{timestamp}_part{i+1}.pdf")
+                                with open(output_path, 'wb') as output_file:
+                                    writer.write(output_file)
+                            
+                            self.after(0, lambda: self.status_label.config(text=f"PDF split into {len(ranges)} files in:\n{output_folder}"))
+                        except Exception as e:
+                            self.after(0, lambda: messagebox.showerror("Error", f"Error splitting PDF: {e}"))
+                            self.after(0, lambda: self.status_label.config(text=""))
+                    
+                    threading.Thread(target=split_thread, daemon=True).start()
                     
                 except ValueError:
                     messagebox.showerror("Error", "Invalid page range format")
@@ -1258,16 +1318,27 @@ class MediaToolsFrame(Frame):
                     start_time = (start_minutes * 60 + start_seconds) * 1000  # Convert to milliseconds
                     end_time = (end_minutes * 60 + end_seconds) * 1000  # Convert to milliseconds
                     
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    output_path = os.path.join(get_trimmed_audio_folder(), 
-                                             f"trimmed_{timestamp}_{os.path.basename(file_path)}")
-                    
-                    audio = AudioSegment.from_file(file_path)
-                    trimmed_audio = audio[start_time:end_time]
-                    trimmed_audio.export(output_path, format=os.path.splitext(output_path)[1][1:])
-                    
-                    self.status_label.config(text=f"Audio trimmed and saved!\nLocation: {output_path}")
+                    # Show processing state
                     trim_dialog.destroy()
+                    self.status_label.config(text="Trimming audio...")
+                    self.update()
+                    
+                    def trim_thread():
+                        try:
+                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            output_path = os.path.join(get_trimmed_audio_folder(), 
+                                                     f"trimmed_{timestamp}_{os.path.basename(file_path)}")
+                            
+                            audio = AudioSegment.from_file(file_path)
+                            trimmed_audio = audio[start_time:end_time]
+                            trimmed_audio.export(output_path, format=os.path.splitext(output_path)[1][1:])
+                            
+                            self.after(0, lambda: self.status_label.config(text=f"Audio trimmed and saved!\nLocation: {output_path}"))
+                        except Exception as e:
+                            self.after(0, lambda: messagebox.showerror("Error", f"Error trimming audio: {e}"))
+                            self.after(0, lambda: self.status_label.config(text=""))
+                    
+                    threading.Thread(target=trim_thread, daemon=True).start()
                     
                 except ValueError:
                     messagebox.showerror("Error", "Please enter valid time in MM:SS format")
@@ -1763,12 +1834,22 @@ class ExtraToolsFrame(Frame):
         if file:
             self.selected_file.set(file)
             if pytesseract:
-                try:
-                    text = pytesseract.image_to_string(Image.open(file))
-                    self.ocr_result.delete("1.0", "end")
-                    self.ocr_result.insert("1.0", text)
-                except Exception as e:
-                    messagebox.showerror("Error", f"Error: {e}")
+                # Show processing state
+                self.ocr_result.delete("1.0", "end")
+                self.ocr_result.insert("1.0", "Processing OCR... please wait...")
+                self.update()
+                
+                # Run OCR in a separate thread to avoid blocking UI
+                def ocr_thread():
+                    try:
+                        text = pytesseract.image_to_string(Image.open(file))
+                        self.after(0, lambda: self.ocr_result.delete("1.0", "end"))
+                        self.after(0, lambda: self.ocr_result.insert("1.0", text))
+                    except Exception as e:
+                        self.after(0, lambda: messagebox.showerror("Error", f"Error: {e}"))
+                        self.after(0, lambda: self.ocr_result.delete("1.0", "end"))
+                
+                threading.Thread(target=ocr_thread, daemon=True).start()
             else:
                 messagebox.showerror("Error", "pytesseract is not installed.")
 
@@ -1821,26 +1902,41 @@ class ExtraToolsFrame(Frame):
         key = self.generate_key()
         if not key:
             return
-        try:
-            with open(file, "rb") as f:
-                data = f.read()
-            fernet = Fernet(key)
-            encrypted = fernet.encrypt(data)
+        
+        # Show processing state
+        self.enc_status.config(text="Encrypting file...")
+        self.update()
+        
+        def encrypt_thread():
+            try:
+                # Read and encrypt entire file for simplicity
+                # Note: For files larger than ~100MB, consider using chunked encryption
+                # with a different cipher (e.g., AES-GCM) to reduce memory usage
+                fernet = Fernet(key)
+                enc_file = os.path.join(get_encryption_folder(), os.path.basename(file) + ".enc")
+                
+                # Read and encrypt file
+                with open(file, "rb") as f:
+                    data = f.read()
+                
+                # Encrypt and write
+                encrypted = fernet.encrypt(data)
+                with open(enc_file, "wb") as f:
+                    f.write(encrypted)
 
-            enc_file = os.path.join(get_encryption_folder(), os.path.basename(file) + ".enc")
-            with open(enc_file, "wb") as f:
-                f.write(encrypted)
+                # Update KEYS_JSON
+                with open(KEYS_JSON, "r") as f:
+                    keys = json.load(f)
+                keys[os.path.basename(enc_file)] = key.decode()
+                with open(KEYS_JSON, "w") as f:
+                    json.dump(keys, f, indent=2)
 
-            # Update KEYS_JSON
-            with open(KEYS_JSON, "r") as f:
-                keys = json.load(f)
-            keys[os.path.basename(enc_file)] = key.decode()
-            with open(KEYS_JSON, "w") as f:
-                json.dump(keys, f, indent=2)
-
-            self.enc_status.config(text=f"Encrypted: {os.path.basename(enc_file)}\nKey: {key.decode()}")
-        except Exception as e:
-            messagebox.showerror("Error", f"Error: {e}")
+                self.after(0, lambda: self.enc_status.config(text=f"Encrypted: {os.path.basename(enc_file)}\nKey: {key.decode()}"))
+            except Exception as e:
+                self.after(0, lambda: messagebox.showerror("Error", f"Error: {e}"))
+                self.after(0, lambda: self.enc_status.config(text=""))
+        
+        threading.Thread(target=encrypt_thread, daemon=True).start()
 
     def decrypt_file(self):
         file = self.selected_file.get()
@@ -1850,23 +1946,50 @@ class ExtraToolsFrame(Frame):
         key = simpledialog.askstring("Input", "Enter decryption key:")
         if not key:
             return
-        try:
-            with open(file, "rb") as f:
-                data = f.read()
-            fernet = Fernet(key.encode())
-            decrypted = fernet.decrypt(data)
+        
+        # Show processing state
+        self.enc_status.config(text="Decrypting file...")
+        self.update()
+        
+        def decrypt_thread():
+            try:
+                # Read and decrypt entire file for simplicity
+                # Note: For files larger than ~100MB, consider using chunked decryption
+                # with a different cipher (e.g., AES-GCM) to reduce memory usage
+                fernet = Fernet(key.encode())
+                dec_file = file.rsplit(".enc", 1)[0]
+                
+                # Read and decrypt file
+                with open(file, "rb") as f:
+                    data = f.read()
+                
+                # Decrypt and write
+                decrypted = fernet.decrypt(data)
+                with open(dec_file, "wb") as f:
+                    f.write(decrypted)
 
-            dec_file = file.rsplit(".enc", 1)[0]
-            with open(dec_file, "wb") as f:
-                f.write(decrypted)
-
-            self.enc_status.config(text=f"Decrypted: {os.path.basename(dec_file)}")
-            if os.name == 'nt':
-                os.startfile(dec_file)
-            else:
-                os.system(f"open {dec_file}")
-        except Exception as e:
-            messagebox.showerror("Error", f"Error: {e}")
+                self.after(0, lambda: self.enc_status.config(text=f"Decrypted: {os.path.basename(dec_file)}"))
+                
+                # Open file safely in the main thread
+                def open_file():
+                    # Validate that the file exists before attempting to open
+                    if not os.path.exists(dec_file):
+                        messagebox.showerror("Error", "Decrypted file not found")
+                        return
+                    
+                    if os.name == 'nt':
+                        os.startfile(dec_file)
+                    else:
+                        import subprocess
+                        subprocess.run(['open', dec_file], check=False)
+                
+                self.after(0, open_file)
+                
+            except Exception as e:
+                self.after(0, lambda: messagebox.showerror("Error", f"Error: {e}"))
+                self.after(0, lambda: self.enc_status.config(text=""))
+        
+        threading.Thread(target=decrypt_thread, daemon=True).start()
 
     def copy_key(self):
         text = self.enc_status.cget("text")
@@ -3251,17 +3374,23 @@ class CompleteApp:
 
     def on_window_resize(self, event):
         # Only handle if it's the root window being resized
+        # Debounce resize events to improve performance
         if event.widget == self.root:
-            # Update layout for better fullscreen handling
-            width = event.width
-            height = event.height
+            # Cancel any pending resize operations
+            if hasattr(self, '_resize_timer'):
+                self.root.after_cancel(self._resize_timer)
+            
+            # Schedule resize operation with a small delay to batch updates
+            self._resize_timer = self.root.after(100, self._do_resize, event.width, event.height)
+    
+    def _do_resize(self, width, height):
+        # Update layout for better fullscreen handling
+        # Maintain minimum size
+        width = max(width, 600)
+        height = max(height, 800)
 
-            # Maintain minimum size
-            width = max(width, 600)
-            height = max(height, 800)
-
-            # Update notebook size and position
-            self.notebook.grid_configure(padx=int(width * 0.01), pady=int(height * 0.01))
+        # Update notebook size and position
+        self.notebook.grid_configure(padx=int(width * 0.01), pady=int(height * 0.01))
 
     def new_download(self):
         self.notebook.select(0)  # Switch to YT Tools tab
